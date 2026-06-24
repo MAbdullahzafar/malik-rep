@@ -148,7 +148,7 @@
             <div class="card tech-card h-100">
                 <div class="card-body p-0">
                     <div class="mb-4">
-                        <span class="tech-label">Real-time Curriculum Operational Logs</span>
+                        <span class="tech-label">Real-time Curriculum Operational Log</span>
                         <h3 class="fw-bold tracking-tight text-black m-0" style="font-size: 1.3rem;">Course Attendance Logs (Today)</h3>
                     </div>
 
