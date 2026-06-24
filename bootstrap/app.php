@@ -43,22 +43,6 @@ $app->singleton(
 
 /*
 |--------------------------------------------------------------------------
-| Vercel Serverless Write Path Patch
-|--------------------------------------------------------------------------
-|
-| Overwrite the storage and bootstrap configuration folders to point to 
-| the writable temporary system drive block whenever running inside Vercel.
-|
-*/
-if (env('APP_ENV') === 'production') {
-    $app->useStoragePath('/tmp');
-    $app->bind('path.bootstrap', function () {
-        return '/tmp';
-    });
-}
-
-/*
-|--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------
 |
