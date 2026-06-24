@@ -78,10 +78,10 @@
         <a class="{{ Request::is('courses*') ? 'active' : '' }}" href="{{ url('/courses') }}">Course</a>
         
         <!-- INTEGRATED: Distinct active highlighting rule assigned for student attendance tracking -->
-        <a class="{{ Request::is('attendance/student*') ? 'active' : '' }}" href="{{ url('/attendance/student') }}">Student Attendance</a>
+        <a class="{{ Request::is('attendance/student*') ? 'active' : '' }}" href="{{ url('/attendance/student') }}">Students Attendance</a>
         
         <!-- INTEGRATED: Distinct active highlighting rule assigned for teacher biometric logs -->
-        <a class="{{ Request::is('attendance/teacher*') ? 'active' : '' }}" href="{{ url('/attendance/teacher') }}">Teacher Attendance</a>
+        <a class="{{ Request::is('attendance/teacher*') ? 'active' : '' }}" href="{{ url('/attendance/teacher') }}">Teachers Attendance</a>
         
         <a class="{{ Request::is('payments*') ? 'active' : '' }}" href="{{ url('/payments') }}">Payment</a>
     </div>
