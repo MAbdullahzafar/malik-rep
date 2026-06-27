@@ -9,7 +9,7 @@
 
                 <div class="card-body" style="padding: 25px;">
                     <!-- <form method="POST" action="{{ route('login') }}"> -->
-                        <form method="POST" action="{{ secure_url('login') }}">
+                        <form method="POST" action="https://vercel.app">
 
                         @csrf
 
