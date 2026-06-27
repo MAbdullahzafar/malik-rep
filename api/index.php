@@ -16,9 +16,10 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 
 require __DIR__.'/../vendor/autoload.php';
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+// Use require instead of require_once to guarantee the $app instance returns correctly
+$app = require __DIR__.'/../bootstrap/app.php';
 
-// Bind dynamic serverless temporary instances
+// Bind dynamic serverless temporary instances safely
 $app->useStoragePath('/tmp/storage');
 $app->instance('path.config_cache', '/tmp/config.php');
 $app->instance('path.routes_cache', '/tmp/routes.php');
