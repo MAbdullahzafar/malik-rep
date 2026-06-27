@@ -4,7 +4,7 @@
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.8.0"
+            "runtime": "vercel-php@0.9.0"
         }
     },
     "routes": [
@@ -21,13 +21,11 @@
         "APP_NAME": "Laravel",
         "APP_ENV": "production",
         "APP_KEY": "base64:uS3KjxO7XbV1WpM2ZQ9K7A8fE6gH3jK1L2M3N4O5P6Q=",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_URL": "https://vercel.app",
         "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "file",
-        "SESSION_LIFETIME": "120",
+        "SESSION_DRIVER": "cookie",
         "CACHE_DRIVER": "array",
-        "VIEW_COMPILED_PATH": "/tmp",
-        "HTTPS": "on"
+        "VIEW_COMPILED_PATH": "/tmp"
     }
 }
