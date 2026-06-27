@@ -130,7 +130,7 @@
             <thead style="background: #f1f1f1; font-weight: 600;">
                 <tr>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 80px;">Photo</th>
+                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 80px;">Photo NO</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Name</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Email</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Phone</th>
