@@ -8,9 +8,7 @@
                 <div class="card-header" style="font-weight: 700; background-color: #f8f9fa;">{{ __('Login') }}</div>
 
                 <div class="card-body" style="padding: 25px;">
-                    <!-- <form method="POST" action="{{ route('login') }}">
-                        <form method="POST" action="https://vercel.app"> -->
-                            <form method="POST" action="{{ url('/login') }}">
+                    <form method="POST" action="{{ route('login') }}">
 
 
                         @csrf
