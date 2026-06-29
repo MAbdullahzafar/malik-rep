@@ -20,8 +20,8 @@
     "env": {
         "APP_NAME": "Laravel",
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
-        "APP_URL": "https://malik-rep-y9uk.vercel.app",
+        "APP_DEBUG": "true",
+        "APP_URL": "https://vercel.app",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "SESSION_SECURE_COOKIE": "true",
