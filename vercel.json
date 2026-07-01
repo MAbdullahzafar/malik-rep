@@ -35,12 +35,12 @@
     "NODE_VERSION": "18.x",
     "TELESCOPE_ENABLED": "false",
     "DEBUGBAR_ENABLED": "false",
-    "DB_CONNECTION": "mysql",
-    "DB_HOST": "YOUR_ACTUAL_REMOTE_DB_HOST_URL_OR_IP",
-    "DB_PORT": "3306",
-    "DB_DATABASE": "YOUR_ACTUAL_REMOTE_DB_NAME",
-    "DB_USERNAME": "YOUR_ACTUAL_REMOTE_DB_USER",
-    "DB_PASSWORD": "YOUR_ACTUAL_REMOTE_DB_PASSWORD",
-    "APP_KEY": "base64:PASTE_YOUR_ACTUAL_APP_KEY_FROM_LOCAL_ENV_HERE="
+    "DB_CONNECTION": "pgsql",
+    "DB_HOST": "aws-1-ap-northeast-1.pooler.supabase.com",
+    "DB_PORT": "6543",
+    "DB_DATABASE": "postgres",
+    "DB_USERNAME": "postgres.owqgxrnkqodtfzbrpjsn",
+    "DB_PASSWORD": "ZOVQ4ZB0iURv1PdX",
+    "APP_KEY": "uS3KjxO7XbV1WpM2ZQ9K7A8fE6gH3jK1L2M3N4O5P6Q="
   }
 }
