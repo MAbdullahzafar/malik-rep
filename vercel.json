@@ -6,10 +6,7 @@
     "api/index.php": {
       "runtime": "vercel-php@0.9.0",
       "memory": 1024,
-      "maxDuration": 10,
-      "config": {
-        "forcePHPPECL": true
-      }
+      "maxDuration": 10
     }
   },
   "routes": [
