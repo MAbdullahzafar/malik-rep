@@ -22,11 +22,112 @@ use App\Http\Controllers\PayrollController;
 
 /*
 |--------------------------------------------------------------------------
+| Dedicated Direct Supabase Migrator Link (Pooler & Connection Safe)
+|--------------------------------------------------------------------------
+*/
+Route::get('/run-migrations-now', function() {
+    try {
+        // Raw PostgreSQL script to build schemas directly and bypass pooler blocks
+        $sql = '
+            CREATE TABLE IF NOT EXISTS "users" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "name" VARCHAR(255) NOT NULL,
+                "email" VARCHAR(255) UNIQUE NOT NULL,
+                "email_verified_at" TIMESTAMP NULL,
+                "password" VARCHAR(255) NOT NULL,
+                "remember_token" VARCHAR(100) NULL,
+                "created_at" TIMESTAMP NULL DEFAULT NOW(),
+                "updated_at" TIMESTAMP NULL DEFAULT NOW()
+            );
+
+            CREATE TABLE IF NOT EXISTS "students" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "name" VARCHAR(255) NOT NULL,
+                "mobile" VARCHAR(255) NULL,
+                "photo" VARCHAR(255) NULL,
+                "created_at" TIMESTAMP NULL,
+                "updated_at" TIMESTAMP NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "teachers" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "name" VARCHAR(255) NOT NULL,
+                "phone" VARCHAR(255) NULL,
+                "designation" VARCHAR(255) NULL,
+                "photo" VARCHAR(255) NULL,
+                "created_at" TIMESTAMP NULL,
+                "updated_at" TIMESTAMP NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "courses" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "course_name" VARCHAR(255) NOT NULL,
+                "syllabus" TEXT NULL,
+                "duration" VARCHAR(255) NULL,
+                "fee" DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                "created_at" TIMESTAMP NULL,
+                "updated_at" TIMESTAMP NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "payments" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "student_id" BIGINT NOT NULL,
+                "paid_date" DATE NULL,
+                "total_fee" DECIMAL(10,2) DEFAULT 0.00,
+                "created_at" TIMESTAMP NULL,
+                "updated_at" TIMESTAMP NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "grades" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "student_id" BIGINT NOT NULL,
+                "course_id" BIGINT NOT NULL,
+                "exam_type" VARCHAR(255) DEFAULT \'Daily Test\',
+                "evaluation_date" DATE NULL,
+                "marks_obtained" DECIMAL(5,2) DEFAULT 0.00,
+                "total_marks" DECIMAL(5,2) DEFAULT 50.00,
+                "grade_letter" VARCHAR(2) DEFAULT \'F\',
+                "status" VARCHAR(255) DEFAULT \'Pass\',
+                "created_at" TIMESTAMP NULL,
+                "updated_at" TIMESTAMP NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS "timetables" (
+                "id" BIGSERIAL PRIMARY KEY,
+                "course_id" BIGINT NOT NULL,
+                "teacher_id" BIGINT NOT NULL,
+                "day_of_week" VARCHAR(255) NOT NULL,
+                "start_time" TIME NOT NULL,
+                "end_time" TIME NOT NULL,
+                "room_number" VARCHAR(255) NOT NULL,
+                "created_at" TIMESTAMP NULL,
+                "updated_at" TIMESTAMP NULL
+            );
+
+            INSERT INTO "users" ("name", "email", "password", "created_at", "updated_at") 
+            VALUES (\'Admin Account\', \'admin@school.com\', \'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi\', NOW(), NOW())
+            ON CONFLICT (email) DO NOTHING;
+        ';
+
+        // Execute the entire table bundle raw statement directly inside Supabase
+        DB::unprepared($sql);
+
+        return "<h1>🎉 Success! Your Supabase migrations have run successfully!</h1>
+                <p>The tables (users, students, teachers, courses, payments, grades, timetables) have been built.</p>
+                <p><strong>Admin Credentials Seeded:</strong> admin@school.com / password</p>
+                <br>
+                <a href='/login' style='padding:10px 20px; background:#4F46E5; color:#fff; text-decoration:none; border-radius:5px;'>Go to Login Page</a>";
+
+    } catch (\Exception $e) {
+        return "<h1>❌ Migration Link Failed:</h1><pre>" . $e->getMessage() . "</pre>";
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
 | Live Serverless Environment Verification Gates (Bypasses Middleware)
 |--------------------------------------------------------------------------
 */
-
-// Diagnostic route to test if Vercel environmental configurations match your cloud database
 Route::get('/test-db', function() {
     try {
         DB::connection()->getPdo();
@@ -54,7 +155,6 @@ Auth::routes(['register' => true]);
 Route::get('/', function () {
     return redirect()->route('login');
 });
-
 /*
 |--------------------------------------------------------------------------
 | Secure Shielded Portal Workspace (Requires Secure Session Authentication)
@@ -83,6 +183,7 @@ Route::middleware(['auth'])->group(function () {
     // Individualized Profiling Analytics Ledgers & Printing Engines
     Route::get('/students/{id}/profile', [StudentProfileController::class, 'show']);
     Route::get('/students/{id}/schedule-pdf', [StudentController::class, 'printSchedule'])->name('students.schedule');
+    
     // Unified Print Engine Engine Route Links
     Route::get('/payments/{id}/print', [PaymentController::class, 'print'])->name('payments.print');
     Route::get('/payment/print/{id}', [PaymentController::class, 'print']); // Fallback support map for legacy references
@@ -93,7 +194,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Dynamic Fee Installments & Overdue Defaulter Roster Connection Map
     Route::get('/finance/defaulters', [FinanceController::class, 'defaulterList'])->name('finance.defaulters');
-
     // Student Manual Roll-Call Attendance Checksheets
     Route::get('/attendance/student', [StudentAttendanceController::class, 'index'])->name('attendance.student.index');
     Route::post('/attendance/student', [StudentAttendanceController::class, 'store'])->name('attendance.student.store');
@@ -240,20 +340,5 @@ Route::get('/rebuild-timetable-table-now', function() {
         return "⚡ Success: Your timetables table has been completely rebuilt with correct columns! Refresh your scheduler page now.";
     } catch (\Exception $e) {
         return "❌ Error: " . $e->getMessage();
-    }
-});
-
-/*
-|--------------------------------------------------------------------------
-| Emergency Serverless Migration Portal
-|--------------------------------------------------------------------------
-*/
-Route::get('/run-migrations-now', function() {
-    try {
-        Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
-        $output = Artisan::output();
-        return "<h3>🎉 Migrations and Seeders completed successfully!</h3><pre>" . $output . "</pre>";
-    } catch (\Exception $e) {
-        return "<h3>❌ Migration Failed:</h3><pre>" . $e->getMessage() . "</pre>";
     }
 });
