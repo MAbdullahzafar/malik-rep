@@ -5,21 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
     /**
@@ -42,7 +30,7 @@ class LoginController extends Controller
 
     /**
      * 🛡️ HIGH-SECURITY METHOD OVERRIDE: Overrides the default trait login flow.
-     * Forces the remember_me feature to remain strictly FALSE and injects active tab session markers.
+     * Forces the remember_me feature to remain strictly FALSE.
      */
     public function login(Request $request)
     {
@@ -54,21 +42,28 @@ class LoginController extends Controller
         }
 
         // 🌟 FORCE STRICT NON-PERSISTENT ATTRIBUTE MAP
-        // The third parameter is the remember flag; we hardcode it to FALSE
         if ($this->guard()->attempt($this->credentials($request), false)) {
-            if ($request->hasSession()) {
-                $request->session()->put('auth.password_confirmed_at', time());
-                
-                // 🛡️ BACKEND LOCK GATE CONNECTION: 
-                // Injects the verification tag into the session ONLY on a successful manual login attempt!
-                $request->session()->put('tab_session_active', true);
-            }
-
             return $this->sendLoginResponse($request);
         }
 
         $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
+    }
+
+    /**
+     * 🛡️ HOOK OVERRIDE: Executes safely AFTER Laravel UI regenerates the session container.
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        if ($request->hasSession()) {
+            $request->session()->put('auth.password_confirmed_at', time());
+            
+            // 🛡️ BACKEND LOCK GATE CONNECTION:
+            // This runs after session regeneration, ensuring the key persists across pages.
+            $request->session()->put('tab_session_active', true);
+        }
+
+        return redirect()->intended($this->redirectPath());
     }
 
     /**

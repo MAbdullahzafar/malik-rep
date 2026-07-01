@@ -1,20 +1,44 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
+
+use App\Http\Controllers\HomeController; 
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController; 
 use App\Http\Controllers\CourseController;   
 use App\Http\Controllers\PaymentController;  
-use App\Http\Controllers\HomeController; 
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\TeacherAttendanceController;
 use App\Http\Controllers\GradeController;       
 use App\Http\Controllers\TimetableController;   
 use App\Http\Controllers\FinanceController;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\PayrollController;
+
+/*
+|--------------------------------------------------------------------------
+| Live Serverless Environment Verification Gates (Bypasses Middleware)
+|--------------------------------------------------------------------------
+*/
+
+// Diagnostic route to test if Vercel environmental configurations match your cloud database
+Route::get('/test-db', function() {
+    try {
+        DB::connection()->getPdo();
+        return "🎉 Serverless Database Connection verified and working perfectly on Vercel!";
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => '❌ Live Cloud Database Connection Failed',
+            'error' => $e->getMessage(),
+            'driver' => config('database.default'),
+            'host' => config('database.connections.' . config('database.default') . '.host'),
+        ], 500);
+    }
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +53,7 @@ Auth::routes(['register' => true]);
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
 /*
 |--------------------------------------------------------------------------
 | Secure Shielded Portal Workspace (Requires Secure Session Authentication)
@@ -57,8 +82,7 @@ Route::middleware(['auth'])->group(function () {
     // Individualized Profiling Analytics Ledgers & Printing Engines
     Route::get('/students/{id}/profile', [StudentProfileController::class, 'show']);
     Route::get('/students/{id}/schedule-pdf', [StudentController::class, 'printSchedule'])->name('students.schedule');
-    
-    // 🌟 UNIFIED PRINT ENGINE ROUTE: Connects your isolated 3-copy vouchers flawlessly!
+    // Unified Print Engine Engine Route Links
     Route::get('/payments/{id}/print', [PaymentController::class, 'print'])->name('payments.print');
     Route::get('/payment/print/{id}', [PaymentController::class, 'print']); // Fallback support map for legacy references
 
@@ -66,7 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/students/{id}/enrollment-details', [PaymentController::class, 'getEnrollmentDetails']);
     Route::get('/payments/enrollment-details/{id}', [PaymentController::class, 'getEnrollmentDetails']);
 
-    // ⚠️ NEW DYNAMIC FEE INSTALLMENTS & OVERDUE DEFAULTER ROSTER CONNECTION MAP
+    // Dynamic Fee Installments & Overdue Defaulter Roster Connection Map
     Route::get('/finance/defaulters', [FinanceController::class, 'defaulterList'])->name('finance.defaulters');
 
     // Student Manual Roll-Call Attendance Checksheets
@@ -77,68 +101,77 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/teacher', [TeacherAttendanceController::class, 'index'])->name('attendance.teacher.index');
     Route::post('/attendance/teacher/register', [TeacherAttendanceController::class, 'registerBiometric'])->name('attendance.teacher.register');
     Route::post('/attendance/teacher/verify', [TeacherAttendanceController::class, 'verifyBiometric'])->name('attendance.teacher.verify');
+
+    // System Maintenance Utility Channel Dashboard Hook
+    Route::post('/admin/optimize-system', [HomeController::class, 'optimizeSystem'])->name('admin.optimize');
+
+    // Support Staff Roster Module Routes
+    Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
+    Route::get('/staff/create', [StaffController::class, 'create'])->name('staff.create');
+    Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
+    Route::get('/staff/{id}/edit', [StaffController::class, 'edit'])->name('staff.edit');
+    Route::put('/staff/{id}', [StaffController::class, 'update'])->name('staff.update');
+
+    // Master Payroll Management Module Routes
+    Route::get('/payrolls', [PayrollController::class, 'index'])->name('payrolls.index');
+    Route::get('/payrolls/generate', [PayrollController::class, 'create'])->name('payrolls.create');
+    Route::post('/payrolls/generate', [PayrollController::class, 'store'])->name('payrolls.store');
+    Route::post('/payrolls/{id}/pay', [PayrollController::class, 'markAsPaid'])->name('payrolls.pay');
 });
+
 /*
 |--------------------------------------------------------------------------
-| System Maintenance Debug Utility Triggers (Public Diagnostics)
+| System Maintenance Debug Utility Triggers & Schema Repair Mechanics
 |--------------------------------------------------------------------------
 */
 
-// EMERGENCY REPAIR PIPELINE LINK: Rebuilds grades table structure to eliminate the status error instantly
+// EMERGENCY REPAIR PIPELINE LINK: Rebuilds grades table framework layout cleanly
 Route::get('/fix-grades-database-now', function() {
     try {
-        try {
-            DB::statement("DROP TABLE IF EXISTS grades");
-        } catch (\Exception $e) {}
+        Schema::dropIfExists('grades');
 
-        DB::statement("CREATE TABLE grades (
-            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            student_id BIGINT UNSIGNED NOT NULL,
-            course_id BIGINT UNSIGNED NOT NULL,
-            exam_type ENUM('Daily Test', 'Midterm', 'Final Term') NOT NULL DEFAULT 'Daily Test',
-            evaluation_date DATE NULL,
-            marks_obtained DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-            total_marks DECIMAL(5,2) NOT NULL DEFAULT 50.00,
-            grade_letter VARCHAR(2) NOT NULL DEFAULT 'F',
-            status VARCHAR(255) NOT NULL DEFAULT 'Pass',
-            created_at TIMESTAMP NULL,
-            updated_at TIMESTAMP NULL
-        )");
+        Schema::create('grades', function ($table) {
+            $table->id();
+            $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('course_id');
+            $table->string('exam_type')->default('Daily Test');
+            $table->date('evaluation_date')->nullable();
+            $table->decimal('marks_obtained', 5, 2)->default(0.00);
+            $table->decimal('total_marks', 5, 2)->default(50.00);
+            $table->string('grade_letter', 2)->default('F');
+            $table->string('status')->default('Pass');
+            $table->timestamps();
+        });
 
-        return "⚡ Success: Your grades database table has been completely rebuilt with the missing 'status' column! Visit your grades page now.";
+        return "⚡ Success: Your grades database table has been completely rebuilt with correct serverless parameters! Visit your grades page now.";
     } catch (\Exception $e) {
         return "❌ Table Repair Exception Error: " . $e->getMessage();
     }
 });
 
+// FIXED SCHEMA FIXER: Rewritten using agnostic fluent blueprints to prevent PostgreSQL compilation exceptions
 Route::get('/force-photo-fix', function() {
     try {
-        try {
-            DB::statement("ALTER TABLE students ADD COLUMN photo VARCHAR(255) NULL AFTER mobile");
-        } catch (\Exception $e) {}
-
-        try {
-            DB::statement("ALTER TABLE teachers ADD COLUMN photo VARCHAR(255) NULL AFTER designation");
-        } catch (\Exception $e) {}
-
-        DB::statement("ALTER TABLE teachers MODIFY COLUMN phone VARCHAR(255) NULL");
-        DB::statement("ALTER TABLE teachers MODIFY COLUMN designation VARCHAR(255) NULL");
+        if (!Schema::hasColumn('students', 'photo')) {
+            Schema::table('students', function($table) { $table->string('photo')->nullable()->after('mobile'); });
+        }
+        if (!Schema::hasColumn('teachers', 'photo')) {
+            Schema::table('teachers', function($table) { $table->string('photo')->nullable()->after('designation'); });
+        }
         
-        $columnsCourses = DB::select("SHOW COLUMNS FROM courses LIKE 'fee'");
-        if (empty($columnsCourses)) {
-            DB::statement("ALTER TABLE courses ADD COLUMN fee DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER duration");
-        } else {
-            DB::statement("ALTER TABLE courses MODIFY COLUMN fee DECIMAL(10,2) NOT NULL DEFAULT 0.00");
+        Schema::table('teachers', function($table) {
+            $table->string('phone')->nullable()->change();
+            $table->string('designation')->nullable()->change();
+        });
+        
+        if (!Schema::hasColumn('courses', 'fee')) {
+            Schema::table('courses', function($table) { $table->decimal('fee', 10, 2)->default(0.00)->after('duration'); });
         }
-
-        $columnsPaidDate = DB::select("SHOW COLUMNS FROM payments LIKE 'paid_date'");
-        if (empty($columnsPaidDate)) {
-            DB::statement("ALTER TABLE payments ADD COLUMN paid_date DATE NULL");
+        if (!Schema::hasColumn('payments', 'paid_date')) {
+            Schema::table('payments', function($table) { $table->date('paid_date')->nullable(); });
         }
-
-        $columnsTotalFee = DB::select("SHOW COLUMNS FROM payments LIKE 'total_fee'");
-        if (empty($columnsTotalFee)) {
-            DB::statement("ALTER TABLE payments ADD COLUMN total_fee DECIMAL(10,2) NULL DEFAULT 0.00");
+        if (!Schema::hasColumn('payments', 'total_fee')) {
+            Schema::table('payments', function($table) { $table->decimal('total_fee', 10, 2)->default(0.00)->nullable(); });
         }
 
         $pastPayments = DB::table('payments')->get();
@@ -157,20 +190,26 @@ Route::get('/force-photo-fix', function() {
             }
         }
         
-        return "⚡ Success: Your student, teacher, courses, and payments database schemas have been fully verified and repaired!";
+        return "⚡ Success: Your student, teacher, courses, and payments schemas have been verified and repaired smoothly!";
     } catch (\Exception $e) {
         return "❌ Notice Schema Exception: " . $e->getMessage();
     }
 });
 
-// 🔍 EMERGENCY PAYMENT TABLE COLUMN TRACKER DIAGNOSTIC ROUTE
+// DYNAMIC TRACKER DIAGNOSTIC ROUTE: Modified safely to dynamically inspect columns on any database vendor mapping
 Route::get('/check-payment-columns', function() {
     try {
-        $columns = DB::select("SHOW COLUMNS FROM payments");
-        $output = "<h3>Your payments table column names are:</h3><ul>";
-        foreach ($columns as $column) {
-            $output .= "<li><strong>" . $column->Field . "</strong> (Type: " . $column->Type . ")</li>";
+        $driver = config('database.default');
+        $output = "<h3>Your payments table column names are [Driver: {$driver}]:</h3><ul>";
+        
+        if ($driver === 'pgsql') {
+            $columns = DB::select("SELECT column_name FROM information_schema.columns WHERE table_name='payments'");
+            foreach ($columns as $column) { $output .= "<li><strong>" . $column->column_name . "</strong></li>"; }
+        } else {
+            $columns = DB::select("SHOW COLUMNS FROM payments");
+            foreach ($columns as $column) { $output .= "<li><strong>" . $column->Field . "</strong> (Type: " . $column->Type . ")</li>"; }
         }
+        
         $output .= "</ul>";
         return $output;
     } catch (\Exception $e) {
@@ -178,7 +217,7 @@ Route::get('/check-payment-columns', function() {
     }
 });
 
-// 🌟 ABSOLUTE TIMETABLE SCHEMA REBUILDER PIPELINE
+// ABSOLUTE TIMETABLE SCHEMA REBUILDER PIPELINE
 Route::get('/rebuild-timetable-table-now', function() {
     try {
         Schema::dropIfExists('timetables');
@@ -198,30 +237,4 @@ Route::get('/rebuild-timetable-table-now', function() {
     } catch (\Exception $e) {
         return "❌ Error: " . $e->getMessage();
     }
-});
-
-/*
-|--------------------------------------------------------------------------
-| Performance Booster & Maintenance Utility Bindings
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth'])->group(function () {
-    // ⚡ SYSTEM MAINTENANCE UTILITY CHANNEL: Maps the performance flush action trigger straight to your dashboard console widget
-    Route::post('/admin/optimize-system', [HomeController::class, 'optimizeSystem'])->name('admin.optimize');
-});
-
-
-Route::middleware(['auth'])->group(function () {
-    // 🧹 SUPPORT STAFF ROSTER MODULE ROUTES
-    Route::get('/staff', [App\Http\Controllers\StaffController::class, 'index'])->name('staff.index');
-    Route::get('/staff/create', [App\Http\Controllers\StaffController::class, 'create'])->name('staff.create');
-    Route::post('/staff', [App\Http\Controllers\StaffController::class, 'store'])->name('staff.store');
-    Route::get('/staff/{id}/edit', [App\Http\Controllers\StaffController::class, 'edit'])->name('staff.edit');
-    Route::put('/staff/{id}', [App\Http\Controllers\StaffController::class, 'update'])->name('staff.update');
-
-    // 💼 MASTER PAYROLL MANAGEMENT MODULE ROUTES
-    Route::get('/payrolls', [App\Http\Controllers\PayrollController::class, 'index'])->name('payrolls.index');
-    Route::get('/payrolls/generate', [App\Http\Controllers\PayrollController::class, 'create'])->name('payrolls.create');
-    Route::post('/payrolls/generate', [App\Http\Controllers\PayrollController::class, 'store'])->name('payrolls.store');
-    Route::post('/payrolls/{id}/pay', [App\Http\Controllers\PayrollController::class, 'markAsPaid'])->name('payrolls.pay');
 });

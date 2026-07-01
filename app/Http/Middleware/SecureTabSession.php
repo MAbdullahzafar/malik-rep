@@ -14,9 +14,12 @@ class SecureTabSession
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip this security check entirely during the login form submission process
+        if ($request->routeIs('login') || $request->is('login*') || $request->is('test-vercel-db*')) {
+            return $next($request);
+        }
+
         // 🛡️ AIRTIGHT PORTAL WORKSPACE VERIFICATION GATE:
-        // If the user is logged in, but the session lacks our manual form login token,
-        // it means they closed the browser tab/app and came back. Wipe everything instantly!
         if (Auth::check() && !$request->session()->has('tab_session_active')) {
             Auth::logout();
             $request->session()->invalidate();
