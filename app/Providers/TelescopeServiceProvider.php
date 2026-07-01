@@ -24,8 +24,6 @@ class TelescopeServiceProvider extends BaseTelescopeProvider
             return;
         }
 
-        \Laravel\Telescope\Telescope::hideSensitiveRequestDetails();
-
         $isLocal = $this->app->environment('local');
 
         \Laravel\Telescope\Telescope::filter(function ($entry) use ($isLocal) {
@@ -36,23 +34,6 @@ class TelescopeServiceProvider extends BaseTelescopeProvider
                    $entry->isScheduledTask() ||
                    $entry->hasMonitoredTag();
         });
-    }
-
-    /**
-     * Prevent sensitive request details from being logged by Telescope.
-     */
-    protected function hideSensitiveRequestDetails(): void
-    {
-        if (!class_exists(\Laravel\Telescope\Telescope::class) || $this->app->environment('local')) {
-            return;
-        }
-
-        \Laravel\Telescope\Telescope::hideRequestParameters(['_token']);
-        \Laravel\Telescope\Telescope::hideRequestHeaders([
-            'cookie',
-            'x-csrf-token',
-            'x-xsrf-token',
-        ]);
     }
 
     /**
