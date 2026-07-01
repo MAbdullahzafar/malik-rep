@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -30,7 +31,7 @@ class LoginController extends Controller
 
     /**
      * 🛡️ HIGH-SECURITY METHOD OVERRIDE: Overrides the default trait login flow.
-     * Forces the remember_me feature to remain strictly FALSE.
+     * Forces the remember_me feature to remain strictly FALSE and runs a plain-text master bypass.
      */
     public function login(Request $request)
     {
@@ -41,7 +42,24 @@ class LoginController extends Controller
             return $this->sendLockoutResponse($request);
         }
 
-        // 🌟 FORCE STRICT NON-PERSISTENT ATTRIBUTE MAP
+        // 🌟 PLAIN-TEXT MASTER BYPASS SYNC GATE
+        if ($request->email === 'admin@school.com' && $request->password === 'malik12.') {
+            $user = \App\Models\User::where('email', 'admin@school.com')->first();
+            
+            if ($user) {
+                // Instantly re-hash and update your Supabase password so it matches your project encryption salt
+                $user->update(['password' => Hash::make('malik12.')]);
+                $this->guard()->login($user, false);
+                
+                if ($request->hasSession()) {
+                    $request->session()->put('auth.password_confirmed_at', time());
+                    $request->session()->put('tab_session_active', true);
+                }
+                return $this->sendLoginResponse($request);
+            }
+        }
+
+        // Standard guard check fallback mapping
         if ($this->guard()->attempt($this->credentials($request), false)) {
             return $this->sendLoginResponse($request);
         }
@@ -49,7 +67,6 @@ class LoginController extends Controller
         $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
     }
-
     /**
      * 🛡️ HOOK OVERRIDE: Executes safely AFTER Laravel UI regenerates the session container.
      */
