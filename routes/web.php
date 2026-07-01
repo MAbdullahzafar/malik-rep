@@ -17,7 +17,6 @@ use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PayrollController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 
 
