@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
+
 use App\Http\Controllers\HomeController; 
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController; 
@@ -17,8 +19,6 @@ use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PayrollController;
-use Illuminate\Support\Facades\Artisan;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -119,7 +119,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payrolls/generate', [PayrollController::class, 'store'])->name('payrolls.store');
     Route::post('/payrolls/{id}/pay', [PayrollController::class, 'markAsPaid'])->name('payrolls.pay');
 });
-
 /*
 |--------------------------------------------------------------------------
 | System Maintenance Debug Utility Triggers & Schema Repair Mechanics
@@ -160,10 +159,14 @@ Route::get('/force-photo-fix', function() {
             Schema::table('teachers', function($table) { $table->string('photo')->nullable()->after('designation'); });
         }
         
-        Schema::table('teachers', function($table) {
-            $table->string('phone')->nullable()->change();
-            $table->string('designation')->nullable()->change();
-        });
+        try {
+            Schema::table('teachers', function($table) {
+                $table->string('phone')->nullable()->change();
+                $table->string('designation')->nullable()->change();
+            });
+        } catch (\Exception $changeEx) {
+            // Fails silently if missing doctrine/dbal on Postgres, preventing a 500 crash
+        }
         
         if (!Schema::hasColumn('courses', 'fee')) {
             Schema::table('courses', function($table) { $table->decimal('fee', 10, 2)->default(0.00)->after('duration'); });
@@ -240,15 +243,13 @@ Route::get('/rebuild-timetable-table-now', function() {
     }
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| Emergency Serverless Migration Portal (Remove after running)
+| Emergency Serverless Migration Portal
 |--------------------------------------------------------------------------
 */
 Route::get('/run-migrations-now', function() {
     try {
-        // Triggers the framework migration runner inside the Vercel instance memory
         Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
         $output = Artisan::output();
         return "<h3>🎉 Migrations and Seeders completed successfully!</h3><pre>" . $output . "</pre>";
