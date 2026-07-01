@@ -1,6 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+/*
+|--------------------------------------------------------------------------
+| Emergency Serverless Migration Portal (Remove after running)
+|--------------------------------------------------------------------------
+*/
+Route::get('/run-migrations-now', function() {
+    try {
+        // Triggers the framework migration runner inside the Vercel instance memory
+        Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
+        $output = Artisan::output();
+        return "<h3>🎉 Migrations and Seeders completed successfully!</h3><pre>" . $output . "</pre>";
+    } catch (\Exception $e) {
+        return "<h3>❌ Migration Failed:</h3><pre>" . $e->getMessage() . "</pre>";
+    }
+});
+
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +41,7 @@ use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\PayrollController;
+
 
 /*
 |--------------------------------------------------------------------------
