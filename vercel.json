@@ -41,6 +41,6 @@
     "DB_DATABASE": "postgres",
     "DB_USERNAME": "postgres.owqgxrnkqodtfzbrpjsn",
     "DB_PASSWORD": "ZOVQ4ZB0iURv1PdX",
-    "APP_KEY": "uS3KjxO7XbV1WpM2ZQ9K7A8fE6gH3jK1L2M3N4O5P6Q="
+    "APP_KEY": "base64:uS3KjxO7XbV1WpM2ZQ9K7A8fE6gH3jK1L2M3N4O5P6Q="
   }
 }
