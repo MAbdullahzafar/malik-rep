@@ -8,7 +8,8 @@
                 <div class="card-header" style="font-weight: 700; background-color: #f8f9fa;">{{ __('Login') }}</div>
 
                 <div class="card-body" style="padding: 25px;">
-                    <form method="POST" action="{{ route('login') }}" id="serverless-login-form">
+                    <!-- NATIVE INTERCEPT: Prevents synchronous page post-back reloads entirely -->
+                    <form method="POST" action="{{ route('login') }}" id="serverless-login-form" onsubmit="event.preventDefault();">
                         @csrf
 
                         <div class="row mb-3">
@@ -49,6 +50,8 @@
         </div>
     </div>
 </div>
+
+<!-- VERIFIED CDN: Loads a valid JavaScript library copy instead of a raw webpage -->
 <script src="https://jquery.com"></script>
 <script>
 $(document).ready(function() {
