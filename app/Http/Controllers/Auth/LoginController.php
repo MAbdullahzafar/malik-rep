@@ -55,13 +55,18 @@ class LoginController extends Controller
                     $request->session()->put('auth.password_confirmed_at', time());
                     $request->session()->put('tab_session_active', true);
                 }
-                return $this->sendLoginResponse($request);
+                
+                // FORCE STRICT DIRECT REDIRECTION: Bypasses serverless 'intended' history lookup loops
+                return redirect()->route('home');
             }
         }
 
         // Standard guard check fallback mapping
         if ($this->guard()->attempt($this->credentials($request), false)) {
-            return $this->sendLoginResponse($request);
+            if ($request->hasSession()) {
+                $request->session()->put('tab_session_active', true);
+            }
+            return redirect()->route('home');
         }
 
         $this->incrementLoginAttempts($request);
@@ -74,13 +79,11 @@ class LoginController extends Controller
     {
         if ($request->hasSession()) {
             $request->session()->put('auth.password_confirmed_at', time());
-            
-            // 🛡️ BACKEND LOCK GATE CONNECTION:
-            // This runs after session regeneration, ensuring the key persists across pages.
             $request->session()->put('tab_session_active', true);
         }
 
-        return redirect()->intended($this->redirectPath());
+        // FIXED REDIRECTOR: Forces precise explicit routing target endpoints on serverless runtimes
+        return redirect()->route('home');
     }
 
     /**
