@@ -1,6 +1,3 @@
-<!-- Move library loading to the absolute top of the file layout matrix -->
-<script src="https://jquery.com"></script>
-
 @extends('layouts.app')
 
 @section('content')
@@ -11,7 +8,7 @@
                 <div class="card-header" style="font-weight: 700; background-color: #f8f9fa;">{{ __('Login') }}</div>
 
                 <div class="card-body" style="padding: 25px;">
-                    <!-- Add explicit onsubmit block directly to the tag element to forcefully drop native reloads -->
+                    <!-- Native onsubmit block forces the browser to wait for the jQuery AJAX check -->
                     <form method="POST" action="{{ route('login') }}" id="serverless-login-form" onsubmit="event.preventDefault();">
                         @csrf
 
@@ -36,7 +33,8 @@
 
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <button type="submit" id="login-submit-btn" class="btn btn-primary" style="background-color: #3b82f6; border: none; padding: 8px 20px; font-weight: 600; border-radius: 4px;">
+                                <!-- Restored default button behaviors to ensure clean hover states -->
+                                <button type="submit" id="login-submit-btn" class="btn btn-primary" style="background-color: #3b82f6; border: none; padding: 8px 20px; font-weight: 600; border-radius: 4px; cursor: pointer;">
                                     {{ __('Login') }}
                                 </button>
 
@@ -54,6 +52,8 @@
     </div>
 </div>
 
+<!-- NATIVE SCRIPT INJECTION HOOK: Safely mounts the assets without blocking parent headers -->
+<script src="https://jquery.com"></script>
 <script>
 $(document).ready(function() {
     $('#serverless-login-form').on('submit', function(e) {
@@ -76,7 +76,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if (response.success && response.redirect) {
-                    // Forcefully redirect the entire browser tab using window location mapping
+                    // Forcefully push the page route to your home dashboard
                     window.location.href = response.redirect;
                 }
             },
