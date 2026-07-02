@@ -9,6 +9,11 @@ use App\Models\User;
 
 class LoginController extends Controller
 {
+    /**
+     * Set the landing route explicitly.
+     */
+    protected $redirectTo = '/home';
+
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
@@ -20,8 +25,8 @@ class LoginController extends Controller
     }
 
     /**
-     * 🛡️ ZERO-SESSION PASSTHROUGH GATE:
-     * Disables stateless trait blocks entirely and forces JavaScript injection redirection.
+     * 🛡️ CLEAN NATIVE CONTROLLER ROUTER:
+     * Disables complex JSON text arrays and forces real browser redirects.
      */
     public function login(Request $request)
     {
@@ -30,28 +35,34 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
+        // Explicit security sync against your Supabase admin account details
         if ($request->email === 'admin@school.com' && $request->password === 'malik12.') {
             $user = User::where('email', 'admin@school.com')->first();
 
             if ($user) {
-                // Set the long-lived remember token cookie explicitly
+                // Log the user context in and lock down a persistent cookie
                 Auth::login($user, true);
 
-                // SMASH THE REDIRECT LOOP: Force the browser window to push straight to the home dashboard
-                return response()->json(['success' => true, 'redirect' => '/home']);
+                // Force the server execution layer to push the browser directly to the dashboard
+                return redirect()->route('home');
             }
         }
 
+        // Standard database auth check mapping fallback
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], true)) {
-            return response()->json(['success' => true, 'redirect' => '/home']);
+            return redirect()->route('home');
         }
 
-        return response()->json(['errors' => ['email' => 'These credentials do not match our records.']], 422);
+        return redirect()->back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'These credentials do not match our records.']);
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect('/login');
     }
 }
