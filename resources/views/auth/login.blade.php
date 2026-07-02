@@ -1,3 +1,6 @@
+<!-- Move library loading to the absolute top of the file layout matrix -->
+<script src="https://jquery.com"></script>
+
 @extends('layouts.app')
 
 @section('content')
@@ -8,9 +11,8 @@
                 <div class="card-header" style="font-weight: 700; background-color: #f8f9fa;">{{ __('Login') }}</div>
 
                 <div class="card-body" style="padding: 25px;">
-                    <form method="POST" action="{{ route('login') }}">
-
-
+                    <!-- Add explicit onsubmit block directly to the tag element to forcefully drop native reloads -->
+                    <form method="POST" action="{{ route('login') }}" id="serverless-login-form" onsubmit="event.preventDefault();">
                         @csrf
 
                         <div class="row mb-3">
@@ -18,12 +20,9 @@
 
                             <div class="col-md-6">
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
+                                <span class="invalid-feedback" id="email-error-msg" role="alert" style="display: none;">
+                                    <strong id="email-error-text"></strong>
+                                </span>
                             </div>
                         </div>
 
@@ -32,20 +31,12 @@
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
-
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
                             </div>
                         </div>
 
-                        <!-- 🌟 HIGH-SECURITY LOCKDOWN: Remember Me Checkbox Block Row Deleted To Prevent Permanent Tracking Cookies -->
-
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary" style="background-color: #3b82f6; border: none; padding: 8px 20px; font-weight: 600; border-radius: 4px;">
+                                <button type="submit" id="login-submit-btn" class="btn btn-primary" style="background-color: #3b82f6; border: none; padding: 8px 20px; font-weight: 600; border-radius: 4px;">
                                     {{ __('Login') }}
                                 </button>
 
@@ -62,4 +53,46 @@
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('#serverless-login-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var form = $(this);
+        var submitBtn = $('#login-submit-btn');
+        var emailInput = $('#email');
+        var errorSpan = $('#email-error-msg');
+        var errorText = $('#email-error-text');
+
+        emailInput.removeClass('is-invalid');
+        errorSpan.hide();
+        submitBtn.prop('disabled', true).text('Processing Portal Entrance...');
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.redirect) {
+                    // Forcefully redirect the entire browser tab using window location mapping
+                    window.location.href = response.redirect;
+                }
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).text('Login');
+                emailInput.addClass('is-invalid');
+                errorSpan.show();
+                
+                if (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.email) {
+                    errorText.text(xhr.responseJSON.errors.email);
+                } else {
+                    errorText.text('Authentication Failed: Verify credentials are correct.');
+                }
+            }
+        });
+    });
+});
+</script>
 @endsection
