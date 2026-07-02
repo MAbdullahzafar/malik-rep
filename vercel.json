@@ -30,6 +30,8 @@
     "LOG_CHANNEL": "stderr",
     "SESSION_DRIVER": "cookie",
     "SESSION_SECURE_COOKIE": "true",
+    "SESSION_DOMAIN": ".vercel.app",
+    "APP_URL": "https://vercel.app",
     "CACHE_DRIVER": "array",
     "VIEW_COMPILED_PATH": "/tmp",
     "NODE_VERSION": "18.x",
