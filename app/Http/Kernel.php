@@ -37,8 +37,8 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             
-            // 🌟 HIGH-SECURITY LOCKDOWN REGISTER: Applied globally across all system modules
-            \App\Http\Middleware\SecureTabSession::class,
+            // 🌟 HIGH-SECURITY LOCKDOWN REGISTER: Disabled to fix serverless redirect drops
+            // \App\Http\Middleware\SecureTabSession::class,
         ],
 
         'api' => [
@@ -47,7 +47,6 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
-
     /**
      * The application's middleware aliases.
      *
