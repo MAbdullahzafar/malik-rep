@@ -15,7 +15,8 @@ return [
     |
     */
 
-    'default' => env('CACHE_DRIVER', 'file'),
+    // HARDCODED FIX: Disables reading 'file' from .env and forces memory array mapping
+    'default' => 'array',
 
     /*
     |--------------------------------------------------------------------------
@@ -53,7 +54,6 @@ return [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),
         ],
-
         'memcached' => [
             'driver' => 'memcached',
             'persistent_id' => env('MEMCACHED_PERSISTENT_ID'),
