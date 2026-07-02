@@ -8,8 +8,8 @@
                 <div class="card-header" style="font-weight: 700; background-color: #f8f9fa;">{{ __('Login') }}</div>
 
                 <div class="card-body" style="padding: 25px;">
-                    <!-- Native onsubmit block forces the browser to wait for the jQuery AJAX check -->
-                    <form method="POST" action="{{ route('login') }}" id="serverless-login-form" onsubmit="event.preventDefault();">
+                    <!-- Standard action submission route that triggers native browser posts -->
+                    <form method="POST" action="{{ route('login') }}">
                         @csrf
 
                         <div class="row mb-3">
@@ -17,9 +17,12 @@
 
                             <div class="col-md-6">
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-                                <span class="invalid-feedback" id="email-error-msg" role="alert" style="display: none;">
-                                    <strong id="email-error-text"></strong>
-                                </span>
+
+                                @error('email')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                         </div>
 
@@ -28,13 +31,29 @@
 
                             <div class="col-md-6">
                                 <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+
+                                @error('password')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6 offset-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" checked>
+                                    <label class="form-check-label" for="remember">
+                                        {{ __('Remember Me') }}
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
                         <div class="row mb-0">
                             <div class="col-md-8 offset-md-4">
-                                <!-- Restored default button behaviors to ensure clean hover states -->
-                                <button type="submit" id="login-submit-btn" class="btn btn-primary" style="background-color: #3b82f6; border: none; padding: 8px 20px; font-weight: 600; border-radius: 4px; cursor: pointer;">
+                                <button type="submit" class="btn btn-primary" style="background-color: #3b82f6; border: none; padding: 8px 20px; font-weight: 600; border-radius: 4px; cursor: pointer;">
                                     {{ __('Login') }}
                                 </button>
 
@@ -51,48 +70,4 @@
         </div>
     </div>
 </div>
-
-<!-- NATIVE SCRIPT INJECTION HOOK: Safely mounts the assets without blocking parent headers -->
-<script src="https://jquery.com"></script>
-<script>
-$(document).ready(function() {
-    $('#serverless-login-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        var form = $(this);
-        var submitBtn = $('#login-submit-btn');
-        var emailInput = $('#email');
-        var errorSpan = $('#email-error-msg');
-        var errorText = $('#email-error-text');
-
-        emailInput.removeClass('is-invalid');
-        errorSpan.hide();
-        submitBtn.prop('disabled', true).text('Processing Portal Entrance...');
-
-        $.ajax({
-            url: form.attr('action'),
-            method: 'POST',
-            data: form.serialize(),
-            dataType: 'json',
-            success: function(response) {
-                if (response.success && response.redirect) {
-                    // Forcefully push the page route to your home dashboard
-                    window.location.href = response.redirect;
-                }
-            },
-            error: function(xhr) {
-                submitBtn.prop('disabled', false).text('Login');
-                emailInput.addClass('is-invalid');
-                errorSpan.show();
-                
-                if (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.email) {
-                    errorText.text(xhr.responseJSON.errors.email);
-                } else {
-                    errorText.text('Authentication Failed: Verify credentials are correct.');
-                }
-            }
-        });
-    });
-});
-</script>
 @endsection
