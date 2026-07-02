@@ -22,9 +22,7 @@ class AppServiceProvider extends ServiceProvider
         // FORCE BOOTSTRAP: Tells Laravel to stop using Tailwind CSS links
         Paginator::useBootstrapFive();
 
-        // Force cookie state persistence configuration mappings across serverless hosting gates
-        config(['session.driver' => 'cookie']);
-        config(['session.domain' => '.vercel.app']);
+        // Let the application dynamically pull drivers from the vercel.json environment setup
         config(['session.secure' => true]);
         config(['session.same_site' => 'lax']);
     }
