@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
     /**
-     * Redirect after login.
+     * Redirect users after login.
      *
      * @var string
      */
@@ -26,7 +24,7 @@ class LoginController extends Controller
     }
 
     /**
-     * Show login page.
+     * Show the login form.
      */
     public function showLoginForm()
     {
@@ -34,49 +32,39 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle login request.
+     * Handle the login request.
      */
     public function login(Request $request)
     {
-        // Validate request
+        // Validate the request
         $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Find user
-        $user = User::where('email', $request->email)->first();
+        // Attempt to authenticate the user
+        if (Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password,
+        ], true)) {
 
-        if (!$user) {
-            dd('❌ User not found in database');
+            // Regenerate session to prevent session fixation
+            $request->session()->regenerate();
+
+            // Redirect to home/dashboard
+            return redirect()->route('home');
         }
 
-        // Verify password
-        if (!Hash::check($request->password, $user->password)) {
-            dd('❌ Password is incorrect');
-        }
-
-        // Login user
-        Auth::login($user, true);
-
-        // Regenerate session
-        $request->session()->regenerate();
-
-        // TEMPORARY DEBUG
-        dd([
-            'Login Successful' => true,
-            'Authenticated' => Auth::check(),
-            'User ID' => Auth::id(),
-            'User Email' => Auth::user()->email,
-            'Session ID' => session()->getId(),
-        ]);
-
-        // Remove the dd() above later and uncomment this:
-        // return redirect()->route('home');
+        // Authentication failed
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors([
+                'email' => 'Invalid email or password.',
+            ]);
     }
 
     /**
-     * Logout user.
+     * Log the user out.
      */
     public function logout(Request $request)
     {
