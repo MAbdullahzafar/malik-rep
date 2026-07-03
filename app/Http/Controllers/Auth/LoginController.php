@@ -1,95 +1,38 @@
-<?php
-
-namespace App\Http\Controllers\Auth;
-
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-
-class LoginController extends Controller
+public function login(Request $request)
 {
-    /**
-     * Redirect path after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
+    // Validate request
+    $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
+    // Find user
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user) {
+        dd('❌ User not found in database');
     }
 
-    /**
-     * Show the login form.
-     */
-    public function showLoginForm()
-    {
-        return view('auth.login');
+    // Check password
+    if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        dd('❌ Password is incorrect');
     }
 
-    /**
-     * Handle login request.
-     */
-    public function login(Request $request)
-    {
-        // Validate request
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+    // Login user
+    Auth::login($user, true);
 
-        // Special admin login
-        if ($request->email === 'admin@school.com' && $request->password === 'malik12.') {
+    // Regenerate session
+    $request->session()->regenerate();
 
-            $user = User::where('email', 'admin@school.com')->first();
+    // Debug authentication
+    dd([
+        '✅ Login Successful' => true,
+        'Authenticated' => Auth::check(),
+        'User ID' => Auth::id(),
+        'User Email' => Auth::user()->email,
+        'Session ID' => session()->getId(),
+    ]);
 
-            if ($user) {
-
-                Auth::login($user, true);
-
-                // Regenerate session for security
-                $request->session()->regenerate();
-
-                return redirect()->route('home');
-            }
-        }
-
-        // Normal Laravel authentication
-        if (Auth::attempt([
-            'email' => $request->email,
-            'password' => $request->password
-        ], true)) {
-
-            // Regenerate session
-            $request->session()->regenerate();
-
-            return redirect()->route('home');
-        }
-
-        // Failed login
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors([
-                'email' => 'These credentials do not match our records.',
-            ]);
-    }
-
-    /**
-     * Logout user.
-     */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect('/login');
-    }
+    // Uncomment these after debugging
+    // return redirect()->route('home');
 }
