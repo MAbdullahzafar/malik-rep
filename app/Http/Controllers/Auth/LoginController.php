@@ -1,38 +1,91 @@
-public function login(Request $request)
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+class LoginController extends Controller
 {
-    // Validate request
-    $request->validate([
-        'email' => ['required', 'email'],
-        'password' => ['required'],
-    ]);
+    /**
+     * Redirect after login.
+     *
+     * @var string
+     */
+    protected $redirectTo = '/home';
 
-    // Find user
-    $user = User::where('email', $request->email)->first();
-
-    if (!$user) {
-        dd('❌ User not found in database');
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware('guest')->except('logout');
     }
 
-    // Check password
-    if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
-        dd('❌ Password is incorrect');
+    /**
+     * Show login page.
+     */
+    public function showLoginForm()
+    {
+        return view('auth.login');
     }
 
-    // Login user
-    Auth::login($user, true);
+    /**
+     * Handle login request.
+     */
+    public function login(Request $request)
+    {
+        // Validate request
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-    // Regenerate session
-    $request->session()->regenerate();
+        // Find user
+        $user = User::where('email', $request->email)->first();
 
-    // Debug authentication
-    dd([
-        '✅ Login Successful' => true,
-        'Authenticated' => Auth::check(),
-        'User ID' => Auth::id(),
-        'User Email' => Auth::user()->email,
-        'Session ID' => session()->getId(),
-    ]);
+        if (!$user) {
+            dd('❌ User not found in database');
+        }
 
-    // Uncomment these after debugging
-    // return redirect()->route('home');
+        // Verify password
+        if (!Hash::check($request->password, $user->password)) {
+            dd('❌ Password is incorrect');
+        }
+
+        // Login user
+        Auth::login($user, true);
+
+        // Regenerate session
+        $request->session()->regenerate();
+
+        // TEMPORARY DEBUG
+        dd([
+            'Login Successful' => true,
+            'Authenticated' => Auth::check(),
+            'User ID' => Auth::id(),
+            'User Email' => Auth::user()->email,
+            'Session ID' => session()->getId(),
+        ]);
+
+        // Remove the dd() above later and uncomment this:
+        // return redirect()->route('home');
+    }
+
+    /**
+     * Logout user.
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
+    }
 }
