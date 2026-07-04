@@ -70,46 +70,71 @@ class StudentController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // 2MB Upload Limit
         ]);
 
-        $input = $request->all();
-        
-        if (isset($input['contact'])) {
-            $input['mobile'] = $input['contact'];
+        try {
+            $input = $request->all();
+            
+            // Map configuration fields down safely to guarantee value persistence
+            if (isset($input['contact'])) {
+                $input['mobile'] = $input['contact'];
+                $input['contact'] = $input['contact'];
+            }
+
+            // INTEGRATED: Process and save new profile photo uploads securely
+            if ($request->hasFile('photo')) {
+                $file = $request->file('photo');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('storage/student_photos'), $filename);
+                $input['photo'] = 'storage/student_photos/' . $filename;
+            }
+
+            // Execute core processing chains inside a transactional boundary layer
+            $student = DB::transaction(function () use ($input, $request) {
+                
+                // The reg_no is generated cleanly via the Model hook built inside the Student model schema
+                $studentInstance = Student::create($input);
+
+                if (!$studentInstance || !$studentInstance->id) {
+                    throw new \Exception("Database engine failed to instantiate student baseline reference entity.");
+                }
+
+                // AUTOMATED ENROLLMENT GENERATOR: Computes a safe string identifier
+                $enrollmentNumber = 'ENR-' . date('Y') . '-' . str_pad($studentInstance->id, 4, '0', STR_PAD_LEFT);
+
+                // FETCH ACTIVE COURSE FEE: Resolves the missing fee column constraint dynamically
+                $coursePrice = Course::where('id', $request->input('course_id'))->value('fee') ?? 0.00;
+
+                // EXTRA RELATION LOG: Generates the explicit matching enrollment row tracking record safely
+                $enrollment = Enrollment::create([
+                    'student_id' => $studentInstance->id,
+                    'course_id'  => $request->input('course_id'),
+                    'enroll_no'  => $enrollmentNumber,
+                    'join_date'  => now()->toDateString(),
+                    'fee'        => $coursePrice
+                ]);
+
+                if (!$enrollment || !$enrollment->id) {
+                    throw new \Exception("Database failed to establish matching course enrollment metadata row connections.");
+                }
+
+                // Instantiate your FinanceController to distribute customized milestone splits
+                $totalSplitsRequested = intval($request->input('requested_installments', 3));
+                
+                $financeEngine = new \App\Http\Controllers\FinanceController();
+                $financeEngine->generateInstallments($enrollment->id, $totalSplitsRequested);
+
+                return $studentInstance;
+            });
+
+            return redirect('students')->with('flash_message', 'Student Added and Custom Fee Installment Plan Generated!');
+
+        } catch (\Exception $e) {
+            // Catches any underlying failure issues and outputs them onto your input form view instantly
+            return back()
+                ->withInput()
+                ->withErrors(['database_error' => 'System Save Interrupted: ' . $e->getMessage()]);
         }
-
-        // INTEGRATED: Process and save new profile photo uploads securely
-        if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/student_photos'), $filename);
-            $input['photo'] = 'storage/student_photos/' . $filename;
-        }
-
-        // The reg_no is generated cleanly via the Model hook built inside the Student model schema
-        $student = Student::create($input);
-
-        // AUTOMATED ENROLLMENT GENERATOR: Computes a safe string identifier
-        $enrollmentNumber = 'ENR-' . date('Y') . '-' . str_pad($student->id, 4, '0', STR_PAD_LEFT);
-
-        // FETCH ACTIVE COURSE FEE: Resolves the missing fee column constraint dynamically
-        $coursePrice = Course::where('id', $request->input('course_id'))->value('fee') ?? 0.00;
-
-        // EXTRA RELATION LOG: Generates the explicit matching enrollment row tracking record safely
-        $enrollment = Enrollment::create([
-            'student_id' => $student->id,
-            'course_id'  => $request->input('course_id'),
-            'enroll_no'  => $enrollmentNumber,
-            'join_date'  => now()->toDateString(),
-            'fee'        => $coursePrice
-        ]);
-
-        // Instantiate your FinanceController to distribute customized milestone splits
-        $totalSplitsRequested = intval($request->input('requested_installments', 3));
-        
-        $financeEngine = new \App\Http\Controllers\FinanceController();
-        $financeEngine->generateInstallments($enrollment->id, $totalSplitsRequested);
-
-        return redirect('students')->with('flash_message', 'Student Added and Custom Fee Installment Plan Generated!');
-    }/**
+    }
+    /**
      * Display the specified resource.
      */
     public function show(string $id): View
@@ -145,6 +170,7 @@ class StudentController extends Controller
         
         if (isset($input['contact'])) {
             $input['mobile'] = $input['contact'];
+            $input['contact'] = $input['contact'];
         }
 
         // INTEGRATED: Process and replace old file pathways with new image entries securely
