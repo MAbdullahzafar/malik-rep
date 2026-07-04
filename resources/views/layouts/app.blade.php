@@ -10,8 +10,13 @@
     <title>{{ config('app.name', 'Laravel') }} – School Matrix System</title>
 
     <!-- Fonts Directory -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://bunny.net" rel="stylesheet">
+    <!-- <link rel="dns-prefetch" href="//fonts.bunny.net">
+    <link href="https://bunny.net" rel="stylesheet"> -->
+<!-- Fonts Directory -->
+<link rel="dns-prefetch" href="//fonts.bunny.net">
+<link href="https://bunny.net" rel="stylesheet">
+
+
 
     <!-- Styles Master Core Sync Layout Aligned With Left Sidebar Schemes -->
     <style>
