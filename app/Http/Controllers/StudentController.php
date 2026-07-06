@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
@@ -77,12 +78,33 @@ class StudentController extends Controller
         }
 
         // INTEGRATED: Process and save new profile photo uploads securely
-        if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/student_photos'), $filename);
-            $input['photo'] = 'storage/student_photos/' . $filename;
-        }
+        // if ($request->hasFile('photo')) {
+        //     $file = $request->file('photo');
+        //     $filename = time() . '_' . $file->getClientOriginalName();
+        //     $file->move(public_path('storage/student_photos'), $filename);
+        //     $input['photo'] = 'storage/student_photos/' . $filename;
+        // }
+
+if ($request->hasFile('photo')) {
+
+    $file = $request->file('photo');
+
+    $filename = time() . '_' . $file->getClientOriginalName();
+
+    Storage::disk('s3')->putFileAs(
+        '',
+        $file,
+        $filename,
+        'public'
+    );
+
+    $input['photo'] = Storage::disk('s3')->url($filename);
+}
+$student->update($input);
+
+
+
+
 
         // The reg_no is generated cleanly via the Model hook built inside the Student model schema
         $student = Student::create($input);
@@ -108,8 +130,13 @@ class StudentController extends Controller
         $financeEngine = new \App\Http\Controllers\FinanceController();
         $financeEngine->generateInstallments($enrollment->id, $totalSplitsRequested);
 
-        return redirect('students')->with('flash_message', 'Student Added and Custom Fee Installment Plan Generated!');
-    }/**
+    //     return redirect('students')->with('flash_message', 'Student Added and Custom Fee Installment Plan Generated!');
+    // }/**
+
+    return redirect('students')->with('flash_message', 'Student Added...');
+}
+
+ /**
      * Display the specified resource.
      */
     public function show(string $id): View
@@ -148,19 +175,39 @@ class StudentController extends Controller
         }
 
         // INTEGRATED: Process and replace old file pathways with new image entries securely
+        // if ($request->hasFile('photo')) {
+        //     // Delete old file if it exists to clean up server memory storage space
+        //     if ($student->photo && file_exists(public_path($student->photo))) {
+        //         @unlink(public_path($student->photo));
+        //     }
+
+        //     $file = $request->file('photo');
+        //     $filename = time() . '_' . $file->getClientOriginalName();
+        //     $file->move(public_path('storage/student_photos'), $filename);
+        //     $input['photo'] = 'storage/student_photos/' . $filename;
+        // }
+
+        // $student->update($input);
+
+
+
+
+
         if ($request->hasFile('photo')) {
-            // Delete old file if it exists to clean up server memory storage space
-            if ($student->photo && file_exists(public_path($student->photo))) {
-                @unlink(public_path($student->photo));
-            }
 
-            $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/student_photos'), $filename);
-            $input['photo'] = 'storage/student_photos/' . $filename;
-        }
+    $file = $request->file('photo');
 
-        $student->update($input);
+    $filename = time() . '_' . $file->getClientOriginalName();
+
+    Storage::disk('s3')->putFileAs(
+        '',
+        $file,
+        $filename,
+        'public'
+    );
+
+    $input['photo'] = Storage::disk('s3')->url($filename);
+}
 
         // UPDATED ENROLLMENT LOGIC: Builds tracking key if missing during update routines
         $enrollmentNumber = 'ENR-' . date('Y') . '-' . str_pad($student->id, 4, '0', STR_PAD_LEFT);
@@ -189,9 +236,10 @@ class StudentController extends Controller
         $student = Student::findOrFail($id);
 
         // INTEGRATED: Cleans up file assets upon hard deletion commands
-        if ($student->photo && file_exists(public_path($student->photo))) {
-            @unlink(public_path($student->photo));
-        }
+        // if ($student->photo && file_exists(public_path($student->photo))) {
+        //     @unlink(public_path($student->photo));
+        // }
+        
 
         $student->delete();
         return redirect('students')->with('flash_message', 'student deleted!');
