@@ -176,11 +176,15 @@
                     <h3 style="margin-top: 0; font-weight: 700; color: #1e293b;">Student Details</h3>
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
                     
-                    @if(!empty($item->photo))
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <img src="{{ asset($item->photo) }}" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
-                        </div>
-                    @endif
+                    @if($item->photo)
+    <img src="{{ $item->photo }}"
+         alt="Student Photo"
+         style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+@else
+    <img src="{{ asset('images/default-avatar.png') }}"
+         alt="No Photo"
+         style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+@endif
 
                     <p><strong>Registration Code:</strong> <span style="font-weight:700; color: #04AA6D;">{{ $item->reg_no ?? 'PENDING' }}</span></p>
                     <p><strong>Full Name:</strong> {{ $item->name }}</p>

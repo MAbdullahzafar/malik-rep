@@ -52,11 +52,32 @@ class Student extends Model
                     }
                 }
 
-                // 🌟 FIXED GLOBAL LOOKUP LOGIC LAYER (POSTGRESQL SYNTAX + PERFORMANCE SYNC)
-                // We use '~' instead of 'REGEXP' for Postgres compliance, and sort directly on the server to maximize speed
-                $lastStudentWithAnyNumber = self::where('reg_no', '~', '^[A-Z]+-[0-9]+$')
-                    ->orderByRaw("CAST(split_part(reg_no, '-', 2) AS INTEGER) DESC")
-                    ->first();
+                // // 🌟 FIXED GLOBAL LOOKUP LOGIC LAYER
+                // // Query database to find the absolute highest sequential number used by ANY student across the whole system
+                // $lastStudentWithAnyNumber = self::where('reg_no', 'REGEXP', '^[A-Z]+-[0-9]+$')
+                //     ->get()
+                //     ->sortByDesc(function($item) {
+                //         // Extract just the numerical digits from the registration code string (e.g. "WD-2001" -> 2001)
+                //         $parts = explode('-', $item->reg_no);
+                //         return isset($parts[1]) ? intval($parts[1]) : 0;
+                //     })
+                //     ->first();
+
+
+
+
+
+                                  $lastStudentWithAnyNumber = self::all()
+                           ->filter(function ($student) {
+                          return preg_match('/^[A-Z]+-\d+$/', $student->reg_no);
+                  })
+                             ->sortByDesc(function ($student) {
+                          $parts = explode('-', $student->reg_no);
+                           return isset($parts[1]) ? intval($parts[1]) : 0;
+                            })
+                              ->first();
+
+
 
                 if ($lastStudentWithAnyNumber) {
                     $parts = explode('-', $lastStudentWithAnyNumber->reg_no);
