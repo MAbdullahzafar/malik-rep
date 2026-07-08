@@ -94,7 +94,9 @@ class StudentProfileController extends Controller
                         'courses.duration',
                         DB::raw('courses.fee as total_course_fee'),
                         DB::raw("'" . $regDate . "' as registration_date"),
-                        DB::raw('"—" as receipt_no')
+                        // DB::raw('"—" as receipt_no')
+                        DB::raw("'—' as receipt_no")
+
                     )
                     ->limit(1) 
                     ->get();

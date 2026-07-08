@@ -52,8 +52,9 @@ class LoginController extends Controller
 
                 Auth::login($user, true);
 
-                // Regenerate session for security
+                // ⚡ FIX: Regenerate FIRST, then set the tracking token key!
                 $request->session()->regenerate();
+                $request->session()->put('tab_session_active', true);
 
                 return redirect()->route('home');
             }
@@ -65,8 +66,9 @@ class LoginController extends Controller
             'password' => $request->password
         ], true)) {
 
-            // Regenerate session
+            // ⚡ FIX: Regenerate FIRST, then set the tracking token key here too!
             $request->session()->regenerate();
+            $request->session()->put('tab_session_active', true);
 
             return redirect()->route('home');
         }
