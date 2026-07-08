@@ -13,7 +13,7 @@ use App\Models\TeacherAttendanceLog;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Cache; // 👈 Added for instant cache loading
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -21,6 +21,7 @@ class HomeController extends Controller
 {
     public function __construct()
     {
+        // 🛡️ Safe, native security guard protects the dashboard
         $this->middleware('auth');
     }
 
@@ -29,12 +30,7 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->has('verify_tab_state') && !$request->session()->has('tab_session_active')) {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-            return redirect()->route('login');
-        }
+        // ⚡ FIX: Strict custom session wipe code removed to prevent login redirect loops
 
         $today = Carbon::today('Asia/Karachi')->toDateString();
 
