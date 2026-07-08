@@ -9,12 +9,10 @@
 
     <title>{{ config('app.name', 'Laravel') }} – School Matrix System</title>
 
-    <!-- Fonts Directory -->
-    <!-- <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://bunny.net" rel="stylesheet"> -->
-<!-- Fonts Directory -->
-<link rel="dns-prefetch" href="//fonts.bunny.net">
-<link href="https://bunny.net" rel="stylesheet">
+       <!-- Fonts Directory -->
+    <link rel="dns-prefetch" href="//fonts.bunny.net">
+    <link href="https://bunny.net" rel="stylesheet">
+
 
 
 
@@ -258,8 +256,11 @@
             .workspace-right-frame { overflow: visible !important; height: auto !important; }
         }
     </style>
-    <!-- Laravel Vite Asset Compiler Bundling Tags -->
+  
+
+        <!-- Laravel Vite Asset Compiler Bundling Tags -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
 </head>
 <body>
 

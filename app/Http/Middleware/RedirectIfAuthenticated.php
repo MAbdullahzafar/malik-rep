@@ -12,31 +12,28 @@ class RedirectIfAuthenticated
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$guards
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
         $guards = empty($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
+            // This code must ONLY run if the user is verified as logged in!
             if (Auth::guard($guard)->check()) {
                 
-                // 🛡️ AIRTIGHT BACKEND PROTECTION GATEWAY
-                // If a user has a logged-in session, but they DO NOT have our manual login token,
-                // it means the browser window was closed and reopened. Wipe the session instantly!
+                // Check if they have the active tab token
                 if (!$request->session()->has('tab_session_active')) {
-                    Auth::guard($guard)->logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
                     
-                    return redirect()->route('login');
+                    // Only wipe session data if we are NOT already on the login route to avoid infinite redirect loops
+                    if (!$request->is('login')) {
+                        Auth::guard($guard)->logout();
+                        $request->session()->invalidate();
+                        $request->session()->regenerateToken();
+                        return redirect()->route('login');
+                    }
                 }
 
-                // If they logged in using the form, let them pass safely to the dashboard
+                // If their session is valid, send them forward to the dashboard workspace home
                 return redirect(RouteServiceProvider::HOME);
             }
         }
