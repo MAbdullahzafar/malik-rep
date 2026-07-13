@@ -104,137 +104,140 @@
                 </div>
             </div>
         </div>
-        <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
-            <thead style="background: #f1f1f1; font-weight: 600;">
-                <tr>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 110px;">Receipt No.</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Student Target</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 150px;">Total Course Fee</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 150px;">Amount Received</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 220px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($payments as $item)
-                @php
-                    $displayFee = $item->total_fee;
-                    if (empty($displayFee) || $displayFee == 0) {
-                        $displayFee = isset($courses) && count($courses) > 0 ? $courses->first()->fee : 0.00;
-                    }
 
-                    // FIXED TARGET MATCHING: Isolates and grabs only the unique registration string directly
-                    $linkedStudent = isset($item->student_name) ? $item->student_name : (isset($item->student) ? $item->student->name : 'ID: ' . $item->student_id);
-                    $studentDisplayName = $linkedStudent;
-                @endphp
-                <tr class="payment-table-row">
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle;">{{ ($payments->currentPage() - 1) * $payments->perPage() + $loop->iteration }}</td>
-                    <td class="receipt-no-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600;">{{ $item->receipt_no }}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600;">
-                        {{ $studentDisplayName }}
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #555555;">
-                        Rs. {{ number_format($displayFee, 2) }}
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #04AA6D;">
-                        Rs. {{ number_format($item->amount, 2) }}
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle;">
-                        <div class="action-btn-group">
-                            <button type="button" class="btn btn-info btn-sm" onclick="openPopup('viewPaymentModal{{ $item->id }}')" style="color: white; padding: 4px 10px; border-radius: 4px; background-color: #17a2b8; border: none; cursor: pointer;">View</button>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="openPopup('editPaymentModal{{ $item->id }}')" style="color: white; padding: 4px 10px; border-radius: 4px; background-color: #007bff; border: none; cursor: pointer;">Edit</button>
-                            <a href="{{ url('/payment/print/' . $item->id) }}" target="_blank" class="btn btn-dark btn-sm" style="color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-weight: 600; background-color: #343a40; display: inline-block;">Print</a>
-                            
-                            <form method="POST" action="{{ url('/payments/' . $item->id) }}" style="display:inline; margin: 0;">
-                                {{ method_field('DELETE') }}
-                                {{ csrf_field() }}
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirm delete payment record?')" style="color: white; padding: 4px 10px; border-radius: 4px; background-color: #dc3545; border: none; cursor: pointer;">Delete</button>
-                            </form>
+        <!-- RESPONSIVE SCROLL WRAPPER: Ensures complete table control and button visibility -->
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
+                <thead style="background: #f1f1f1; font-weight: 600;">
+                    <tr>
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Receipt No.</th>
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Student Target</th>
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 150px;">Total Course Fee</th>
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 150px;">Amount Received</th>
+                        <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 240px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($payments as $item)
+                    @php
+                        $displayFee = $item->total_fee;
+                        if (empty($displayFee) || $displayFee == 0) {
+                            $displayFee = isset($courses) && count($courses) > 0 ? $courses->first()->fee : 0.00;
+                        }
+
+                        // FIXED TARGET MATCHING: Isolates and grabs only the unique registration string directly
+                        $linkedStudent = isset($item->student_name) ? $item->student_name : (isset($item->student) ? $item->student->name : 'ID: ' . $item->student_id);
+                        $studentDisplayName = $linkedStudent;
+                    @endphp
+                    <tr class="payment-table-row">
+                        <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle;">{{ ($payments->currentPage() - 1) * $payments->perPage() + $loop->iteration }}</td>
+                        <!-- SAFE NULL COALESCING GUARD FIXED BELOW TO PREVENT CRASHES -->
+                        <td class="receipt-no-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600;">{{ $item->receipt_no ?? '—' }}</td>
+                        <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600;">
+                            {{ $studentDisplayName }}
+                        </td>
+                        <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #555555;">
+                            Rs. {{ number_format($displayFee, 2) }}
+                        </td>
+                        <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #04AA6D;">
+                            Rs. {{ number_format($item->amount, 2) }}
+                        </td>
+                        <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle;">
+                            <div class="action-btn-group">
+                                <button type="button" class="btn btn-info btn-sm" onclick="openPopup('viewPaymentModal{{ $item->id }}')" style="color: white; padding: 4px 10px; border-radius: 4px; background-color: #17a2b8; border: none; cursor: pointer;">View</button>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="openPopup('editPaymentModal{{ $item->id }}')" style="color: white; padding: 4px 10px; border-radius: 4px; background-color: #007bff; border: none; cursor: pointer;">Edit</button>
+                                <a href="{{ url('/payment/print/' . $item->id) }}" target="_blank" class="btn btn-dark btn-sm" style="color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-weight: 600; background-color: #343a40; display: inline-block;">Print</a>
+                                <form method="POST" action="{{ url('/payments/' . $item->id) }}" style="display:inline; margin: 0;">
+                                    {{ method_field('DELETE') }}
+                                    {{ csrf_field() }}
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirm delete payment record?')" style="color: white; padding: 4px 10px; border-radius: 4px; background-color: #dc3545; border: none; cursor: pointer;">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- INDIVIDUAL POPUP LAYER FOR VIEWING -->
+                    <div class="popup-overlay" id="viewPaymentModal{{ $item->id }}-overlay" onclick="closePopup('viewPaymentModal{{ $item->id }}')"></div>
+                    <div class="native-popup" id="viewPaymentModal{{ $item->id }}">
+                        <h3 style="margin-top: 0; font-weight: 700; color: #333;">Payment Receipt Details</h3>
+                        <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 15px 0;">
+                        <p><strong>Receipt Number:</strong> {{ $item->receipt_no ?? '—' }}</p>
+                        <p><strong>Student Registered:</strong> {{ $studentDisplayName }}</p>
+                        <p><strong>Total Master Course Fee:</strong> Rs. {{ number_format($displayFee, 2) }}</p>
+                        <p><strong>Amount Collected:</strong> Rs. {{ number_format($item->amount, 2) }}</p>
+                        <p><strong>Date of Transaction:</strong> {{ \Carbon\Carbon::parse($item->payment_date)->format('M d, Y') }}</p>
+                        <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 15px 0;">
+                        <div style="text-align: right;">
+                            <button type="button" class="btn btn-secondary" onclick="closePopup('viewPaymentModal{{ $item->id }}')" style="padding: 6px 14px; border-radius: 4px; background-color: #6c757d; color: white; border: none; cursor: pointer;">Close</button>
                         </div>
-                    </td>
-                </tr>
-
-                <!-- INDIVIDUAL POPUP LAYER FOR VIEWING -->
-                <div class="popup-overlay" id="viewPaymentModal{{ $item->id }}-overlay" onclick="closePopup('viewPaymentModal{{ $item->id }}')"></div>
-                <div class="native-popup" id="viewPaymentModal{{ $item->id }}">
-                    <h3 style="margin-top: 0; font-weight: 700; color: #333;">Payment Receipt Details</h3>
-                    <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 15px 0;">
-                    <p><strong>Receipt Number:</strong> {{ $item->receipt_no }}</p>
-                    <p><strong>Student Registered:</strong> {{ $studentDisplayName }}</p>
-                    <p><strong>Total Master Course Fee:</strong> Rs. {{ number_format($displayFee, 2) }}</p>
-                    <p><strong>Amount Collected:</strong> Rs. {{ number_format($item->amount, 2) }}</p>
-                    <p><strong>Date of Transaction:</strong> {{ \Carbon\Carbon::parse($item->payment_date)->format('M d, Y') }}</p>
-                    <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 15px 0;">
-                    <div style="text-align: right;">
-                        <button type="button" class="btn btn-secondary" onclick="closePopup('viewPaymentModal{{ $item->id }}')" style="padding: 6px 14px; border-radius: 4px; background-color: #6c757d; color: white; border: none; cursor: pointer;">Close</button>
                     </div>
-                </div>
 
-                <!-- INDIVIDUAL POPUP LAYER FOR EDITING -->
-                <div class="popup-overlay" id="editPaymentModal{{ $item->id }}-overlay" onclick="closePopup('editPaymentModal{{ $item->id }}')"></div>
-                <div class="native-popup" id="editPaymentModal{{ $item->id }}">
-                    <h3 style="margin-top: 0; font-weight: 700; color: #333;">Modify Payment Record</h3>
-                    <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 15px 0;">
-                    
-                    <form method="POST" action="{{ url('/payments/' . $item->id) }}">
-                        {{ method_field('PATCH') }}
-                        {{ csrf_field() }}
+                    <!-- INDIVIDUAL POPUP LAYER FOR EDITING -->
+                    <div class="popup-overlay" id="editPaymentModal{{ $item->id }}-overlay" onclick="closePopup('editPaymentModal{{ $item->id }}')"></div>
+                    <div class="native-popup" id="editPaymentModal{{ $item->id }}">
+                        <h3 style="margin-top: 0; font-weight: 700; color: #333;">Modify Payment Record</h3>
+                        <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 15px 0;">
                         
-                        <div class="form-group-item">
-                            <label>Receipt Number</label>
-                            <input type="text" name="receipt_no" value="{{ $item->receipt_no }}" readonly style="background: #f8f9fa; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-                        <div class="form-group-item">
-                            <label>Select Target Student</label>
-                            <select name="student_id" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                @if(isset($enrollments))
-                                    @foreach($enrollments as $student)
-                                        <option value="{{ $student->id }}" {{ $item->student_id == $student->id ? 'selected' : '' }}>
-                                            [{{ $student->reg_no ?? 'REG' }}] — {{ $student->name }}
-                                        </option>
-                                    @endforeach
-                                @else
-                                    <option value="{{ $item->student_id }}" selected>{{ $studentDisplayName }}</option>
-                                @endif
-                            </select>
-                        </div>
-                        <div class="form-group-item">
-                            <label>Select Active Course Enrollment</label>
-                            <select class="course-fee-selector" onchange="syncEditModalFee(this, 'edit_total_fee_{{ $item->id }}')" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                <option value="">-- Choose Course to View Price --</option>
-                                @if(isset($courses))
-                                    @foreach($courses as $course)
-                                        <option value="{{ $course->fee }}" {{ $item->total_fee == $course->fee ? 'selected' : '' }}>{{ $course->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div class="form-group-item">
-                            <label>Total Course Fee (Rs.)</label>
-                            <input type="text" name="total_fee" id="edit_total_fee_{{ $item->id }}" value="{{ $displayFee }}" readonly style="background: #f8f9fa; font-weight: 600; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-                        <div class="form-group-item">
-                            <label>Date of Collection</label>
-                            <input type="date" name="payment_date" value="{{ $item->payment_date }}" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-                        <div class="form-group-item">
-                            <label>Amount Paid (Rs.)</label>
-                            <input type="number" step="0.01" name="amount" value="{{ $item->amount }}" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-
-                        <div style="text-align: right; margin-top: 20px; display: flex; gap: 6px; justify-content: flex-end;">
-                            <button type="button" class="btn btn-secondary" onclick="closePopup('editPaymentModal{{ $item->id }}')" style="padding: 6px 12px; border-radius: 4px; background-color: #6c757d; color: white; border: none; cursor: pointer;">Cancel</button>
-                            <button type="submit" class="btn btn-primary" style="padding: 6px 12px; border-radius: 4px; background-color: #007bff; color: white; border: none; cursor: pointer;">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
-            @empty
-                <tr>
-                    <td colspan="6" style="border: 1px solid #dee2e6; padding: 25px; text-align: center; color: #888; background: #fafafa; font-style: italic;">No payment ledger entries recorded inside current session window bounds.</td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
+                        <form method="POST" action="{{ url('/payments/' . $item->id) }}">
+                            {{ method_field('PATCH') }}
+                            {{ csrf_field() }}
+                            
+                            <div class="form-group-item">
+                                <label>Receipt Number</label>
+                                <input type="text" name="receipt_no" value="{{ $item->receipt_no ?? '—' }}" readonly style="background: #f8f9fa; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+                            <div class="form-group-item">
+                                <label>Select Target Student</label>
+                                <select name="student_id" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    @if(isset($enrollments))
+                                        @foreach($enrollments as $student)
+                                            <option value="{{ $student->id }}" {{ $item->student_id == $student->id ? 'selected' : '' }}>
+                                                [{{ $student->reg_no ?? 'REG' }}] — {{ $student->name }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="{{ $item->student_id }}" selected>{{ $studentDisplayName }}</option>
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="form-group-item">
+                                <label>Select Active Course Enrollment</label>
+                                <select class="course-fee-selector" onchange="syncEditModalFee(this, 'edit_total_fee_{{ $item->id }}')" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                    <option value="">-- Choose Course to View Price --</option>
+                                    @if(isset($courses))
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->fee }}" {{ $item->total_fee == $course->fee ? 'selected' : '' }}>{{ $course->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="form-group-item">
+                                <label>Total Course Fee (Rs.)</label>
+                                <input type="text" name="total_fee" id="edit_total_fee_{{ $item->id }}" value="{{ $displayFee }}" readonly style="background: #f8f9fa; font-weight: 600; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+                            <div class="form-group-item">
+                                <label>Date of Collection</label>
+                                <input type="date" name="payment_date" value="{{ $item->payment_date }}" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+                            <div class="form-group-item">
+                                <label>Amount Paid (Rs.)</label>
+                                <input type="number" step="0.01" name="amount" value="{{ $item->amount }}" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                            </div>
+                            <div style="text-align: right; margin-top: 20px; display: flex; gap: 6px; justify-content: flex-end;">
+                                <button type="button" class="btn btn-secondary" onclick="closePopup('editPaymentModal{{ $item->id }}')" style="padding: 6px 12px; border-radius: 4px; background-color: #6c757d; color: white; border: none; cursor: pointer;">Cancel</button>
+                                <button type="submit" class="btn btn-primary" style="padding: 6px 12px; border-radius: 4px; background-color: #007bff; color: white; border: none; cursor: pointer;">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                @empty
+                    <tr>
+                        <td colspan="6" style="border: 1px solid #dee2e6; padding: 25px; text-align: center; color: #888; background: #fafafa; font-style: italic;">No payment ledger entries recorded inside current session window bounds.</td>
+                    </tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div> <!-- END OF RESPONSIVE SCROLL WRAPPER -->
 
         <!-- Framework Pagination Links -->
         <div style="margin-top: 20px;">
@@ -351,7 +354,7 @@
                 courseSelect.innerHTML = '<option value="">⚠️ No active registration found</option>';
                 feeInput.value = "0.00";
             });
-    }
+}
 
     /**
      * Fallback utility for managing row-level editing overlays
