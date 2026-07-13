@@ -104,17 +104,24 @@
             </div>
             
         </div>
+        
         <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
-            <thead style="background: #f1f1f1; font-weight: 600; color: #475569;">
+           <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+ 
+        <thead style="background: #f1f1f1; font-weight: 600; color: #475569;">
                 <tr>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 80px;">Photo</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 130px;">Reg No.</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Name</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 120px;">Course</th>
+                    <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 120px;">Course</th> -->
+                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Course</th>
+
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Address</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Mobile</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 200px;">Actions</th>
+                    <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 200px;">Actions</th> -->
+                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 240px;">Actions</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -254,6 +261,8 @@
             </tr>
             </tbody>
         </table>
+        </div>
+
 
         <div style="margin-top: 20px;">
             {{ $students->links() }}
