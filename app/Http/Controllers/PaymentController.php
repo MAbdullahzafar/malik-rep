@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class PaymentController extends Controller
@@ -29,8 +30,13 @@ class PaymentController extends Controller
 
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
-                $q->where('payments.receipt_no', 'LIKE', "%{$search}%")
-                  ->orWhere('students.name', 'LIKE', "%{$search}%");
+                // 🛡️ SCHEMA SAFETY CHECK: Fallback safely if receipt_no doesn't exist yet
+                if (Schema::hasColumn('payments', 'receipt_no')) {
+                    $q->where('payments.receipt_no', 'LIKE', "%{$search}%")
+                      ->orWhere('students.name', 'LIKE', "%{$search}%");
+                } else {
+                    $q->where('students.name', 'LIKE', "%{$search}%");
+                }
             });
         }
 
@@ -48,10 +54,9 @@ class PaymentController extends Controller
     {
         return view('students.payment');
     }
+
     /**
      * Store a newly created payment resource in storage.
-     * 🌟 STRICT COMPULSORY ADMISSION FEE GATEWAY BLOCKER:
-     * Rejects tuition payments entirely if the student has an outstanding Admission Fee.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -76,7 +81,7 @@ class PaymentController extends Controller
             ->where(function($query) {
                 $query->where('installment_number', 0)
                       ->orWhere('installment_number', 'LIKE', '%Admission%')
-                      ->orWhere('status', 'SETTLED'); // Identifies the special row in your layout
+                      ->orWhere('status', 'SETTLED');
             })
             ->where('status', '!=', 'Paid')
             ->first();
@@ -85,7 +90,6 @@ class PaymentController extends Controller
         if ($unpaidAdmissionRow) {
             $admissionDueRemaining = floatval($unpaidAdmissionRow->base_amount) - floatval($unpaidAdmissionRow->amount_paid);
             
-            // Check if the input amount can completely clear the remaining admission fee right now
             if ($paymentAmount < $admissionDueRemaining) {
                 return redirect()->back()->withInput()->withErrors([
                     'error' => "❌ CRITICAL SECURITY BLOCK: Monthly course fee installments are locked! This student has an unpaid separate Admission Fee. You must pay at least Rs. " . number_format($admissionDueRemaining, 2) . " to settle the Admission Fee first before any course fees can be processed."
@@ -98,16 +102,22 @@ class PaymentController extends Controller
 
         DB::beginTransaction();
         try {
-            // Write to master history payment transaction logs
-            DB::table('payments')->insert([
+            $paymentData = [
                 'enrollment_id' => $enrollment->id,
                 'amount'        => $paymentAmount,
                 'payment_date'  => $paymentDate,
-                'receipt_no'    => $receiptNo,
                 'total_fee'     => $courseFee,
                 'created_at'    => now(),
                 'updated_at'    => now()
-            ]);
+            ];
+
+            // 🛡️ SCHEMA SAFETY CHECK: Inject key attribute fields conditionally
+            if (Schema::hasColumn('payments', 'receipt_no')) {
+                $paymentData['receipt_no'] = $receiptNo;
+            }
+
+            // Write to master history payment transaction logs safely
+            DB::table('payments')->insert($paymentData);
 
             $remainingCash = $paymentAmount;
 
@@ -123,13 +133,12 @@ class PaymentController extends Controller
                 ]);
                 $remainingCash = round($remainingCash - $admissionDueRemaining, 2);
             }
-
             // Step B: Only apply left-over funds to standard monthly installments if any remain
             if ($remainingCash > 0) {
                 $pendingInstallments = DB::table('payment_installments')
                     ->where('student_id', $studentId)
                     ->where('status', '!=', 'Paid')
-                    ->where('installment_number', '>', 0) // Strictly targets months 1 to 6
+                    ->where('installment_number', '>', 0)
                     ->orderBy('installment_number', 'asc')
                     ->lockForUpdate()
                     ->get();
@@ -179,11 +188,13 @@ class PaymentController extends Controller
 
             DB::commit();
             return redirect()->route('payments.index')->with('flash_message', '🎉 Transaction processed cleanly! Separate baseline admission requirements have been successfully verified.');
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Processing Matrix Failure: ' . $e->getMessage()]);
         }
     }
+
     /**
      * Handles edited form records safely to prevent route crashes.
      */
@@ -206,8 +217,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Cleans up single transaction logs from database records cleanly,
-     * and automatically rolls back affected student milestone ledgers to 'Unpaid'.
+     * Cleans up single transaction logs from database records cleanly.
      */
     public function destroy(string $id): RedirectResponse
     {
