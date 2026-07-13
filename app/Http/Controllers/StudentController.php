@@ -20,7 +20,7 @@ class StudentController extends Controller
     {
         $search = $request->input('search');
 
-        // OPTIMIZED: Pulls only 15 rows, eager loads course, and adds direct search capabilities for registration columns
+        // OPTIMIZED: Pulls only 15 rows, eager loads course, and adds direct search capabilities
         $students = Student::with('course')
         ->when($search, function($query) use ($search) {
             return $query->where(function($q) use ($search) {
@@ -34,7 +34,7 @@ class StudentController extends Controller
         ->paginate(15)
         ->withQueryString(); 
 
-        // 🛡️ FIXED BINDING MATRIX: Appends flat course_name attributes right inside data collections objects to match index.blade layout lookups
+        // 🛡️ FIXED BINDING MATRIX: Appends flat course_name attributes inside data collections
         $students->getCollection()->transform(function ($item) {
             $item->course_name = $item->course ? $item->course->name : null;
             return $item;
@@ -56,19 +56,18 @@ class StudentController extends Controller
     {
         return view('students.create');
     }
-
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in storage registers.
      */  
     public function store(Request $request): RedirectResponse
     {
-        // Validate incoming registration properties safely including your course identifier tracking
+        // Validate incoming registration properties safely
         $request->validate([
             'name' => 'required',
             'address' => 'required',
             'course_id' => 'required|exists:courses,id',
-            'requested_installments' => 'required|integer|min:1|max:12', // INJECTED VALIDATION FOR THE PICKER
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // 2MB Upload Limit
+            'requested_installments' => 'required|integer|min:1|max:12', 
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
         ]);
 
         $input = $request->all();
@@ -77,34 +76,20 @@ class StudentController extends Controller
             $input['mobile'] = $input['contact'];
         }
 
-        // INTEGRATED: Process and save new profile photo uploads securely
-        // if ($request->hasFile('photo')) {
-        //     $file = $request->file('photo');
-        //     $filename = time() . '_' . $file->getClientOriginalName();
-        //     $file->move(public_path('storage/student_photos'), $filename);
-        //     $input['photo'] = 'storage/student_photos/' . $filename;
-        // }
+        // INTEGRATED: Process and save new profile photo uploads to Amazon S3 securely
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
 
-if ($request->hasFile('photo')) {
+            Storage::disk('s3')->putFileAs(
+                '',
+                $file,
+                $filename,
+                'public'
+            );
 
-    $file = $request->file('photo');
-
-    $filename = time() . '_' . $file->getClientOriginalName();
-
-    Storage::disk('s3')->putFileAs(
-        '',
-        $file,
-        $filename,
-        'public'
-    );
-
-    $input['photo'] = Storage::disk('s3')->url($filename);
-}
-$student->update($input);
-
-
-
-
+            $input['photo'] = Storage::disk('s3')->url($filename);
+        }
 
         // The reg_no is generated cleanly via the Model hook built inside the Student model schema
         $student = Student::create($input);
@@ -130,13 +115,10 @@ $student->update($input);
         $financeEngine = new \App\Http\Controllers\FinanceController();
         $financeEngine->generateInstallments($enrollment->id, $totalSplitsRequested);
 
-    //     return redirect('students')->with('flash_message', 'Student Added and Custom Fee Installment Plan Generated!');
-    // }/**
+        return redirect('students')->with('flash_message', 'Student Added and Custom Fee Installment Plan Generated!');
+    }
 
-    return redirect('students')->with('flash_message', 'Student Added...');
-}
-
- /**
+    /**
      * Display the specified resource.
      */
     public function show(string $id): View
@@ -153,7 +135,6 @@ $student->update($input);
         $student = Student::findOrFail($id);
         return view('students.edit')->with('students', $student);
     }
-
     /**
      * Update the specified resource in data storage banks safely.
      */
@@ -174,40 +155,30 @@ $student->update($input);
             $input['mobile'] = $input['contact'];
         }
 
-        // INTEGRATED: Process and replace old file pathways with new image entries securely
-        // if ($request->hasFile('photo')) {
-        //     // Delete old file if it exists to clean up server memory storage space
-        //     if ($student->photo && file_exists(public_path($student->photo))) {
-        //         @unlink(public_path($student->photo));
-        //     }
-
-        //     $file = $request->file('photo');
-        //     $filename = time() . '_' . $file->getClientOriginalName();
-        //     $file->move(public_path('storage/student_photos'), $filename);
-        //     $input['photo'] = 'storage/student_photos/' . $filename;
-        // }
-
-        // $student->update($input);
-
-
-
-
-
+        // INTEGRATED: Process and replace old S3 file pathways with new image entries securely
         if ($request->hasFile('photo')) {
+            // Delete old file from S3 if it exists to keep storage clean
+            if ($student->photo) {
+                $oldFilename = basename($student->photo);
+                if (Storage::disk('s3')->exists($oldFilename)) {
+                    Storage::disk('s3')->delete($oldFilename);
+                }
+            }
 
-    $file = $request->file('photo');
+            $file = $request->file('photo');
+            $filename = time() . '_' . $file->getClientOriginalName();
 
-    $filename = time() . '_' . $file->getClientOriginalName();
+            Storage::disk('s3')->putFileAs(
+                '',
+                $file,
+                $filename,
+                'public'
+            );
 
-    Storage::disk('s3')->putFileAs(
-        '',
-        $file,
-        $filename,
-        'public'
-    );
+            $input['photo'] = Storage::disk('s3')->url($filename);
+        }
 
-    $input['photo'] = Storage::disk('s3')->url($filename);
-}
+        $student->update($input);
 
         // UPDATED ENROLLMENT LOGIC: Builds tracking key if missing during update routines
         $enrollmentNumber = 'ENR-' . date('Y') . '-' . str_pad($student->id, 4, '0', STR_PAD_LEFT);
@@ -235,13 +206,20 @@ $student->update($input);
     {
         $student = Student::findOrFail($id);
 
-        // INTEGRATED: Cleans up file assets upon hard deletion commands
-        // if ($student->photo && file_exists(public_path($student->photo))) {
-        //     @unlink(public_path($student->photo));
-        // }
-        
+        // S3 FILE CLEANUP: Delete file asset upon hard deletion commands
+        if ($student->photo) {
+            $filename = basename($student->photo);
+            if (Storage::disk('s3')->exists($filename)) {
+                Storage::disk('s3')->delete($filename);
+            }
+        }
+
+        // Cascade manually clear records out if database foreign key constraints are not set
+        DB::table('payment_installments')->where('student_id', $student->id)->delete();
+        DB::table('enrollments')->where('student_id', $student->id)->delete();
 
         $student->delete();
+
         return redirect('students')->with('flash_message', 'student deleted!');
     }
 
@@ -265,8 +243,11 @@ $student->update($input);
             ->select('enrollments.*', 'courses.name as course_name', 'courses.duration')
             ->first();
 
+        $enrollmentId = $enrollment ? $enrollment->id : 0;
+
         $installments = DB::table('payment_installments')
             ->where('student_id', $cleanStudentId)
+            ->orWhere('enrollment_id', $enrollmentId)
             ->orderBy('installment_number', 'asc')
             ->get();
 

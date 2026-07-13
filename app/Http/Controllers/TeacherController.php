@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Teacher; 
 use Illuminate\View\View;
+// Cloudinary SDK classes added here
+use Cloudinary\Configuration\Configuration;
+use Cloudinary\Api\Upload\UploadApi;
 
 class TeacherController extends Controller
 {
@@ -48,9 +51,18 @@ class TeacherController extends Controller
 
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/teachers'), $filename);
-            $validated['photo'] = 'uploads/teachers/' . $filename;
+            
+            // Initialize Cloudinary (Automatically reads CLOUDINARY_URL environment variable)
+            Configuration::instance();
+            $uploadApi = new UploadApi();
+            
+            // Upload the temporary file straight to Cloudinary
+            $response = $uploadApi->upload($file->getRealPath(), [
+                'folder' => 'teachers'
+            ]);
+            
+            // Store the full secure URL in the database array
+            $validated['photo'] = $response['secure_url'];
         }
 
         Teacher::create($validated);
@@ -82,14 +94,22 @@ class TeacherController extends Controller
         ]);
 
         if ($request->hasFile('photo')) {
-            if ($teacher->photo && file_exists(public_path($teacher->photo))) {
-                @unlink(public_path($teacher->photo));
-            }
-
+            // Note: Cloudinary asset replacement happens automatically by overwriting 
+            // the URL in your database. Old assets can be managed directly on your Cloudinary dashboard.
+            
             $file = $request->file('photo');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/teachers'), $filename);
-            $validated['photo'] = 'uploads/teachers/' . $filename;
+            
+            // Initialize Cloudinary
+            Configuration::instance();
+            $uploadApi = new UploadApi();
+            
+            // Upload the new image file
+            $response = $uploadApi->upload($file->getRealPath(), [
+                'folder' => 'teachers'
+            ]);
+            
+            // Update the array with the new web image URL
+            $validated['photo'] = $response['secure_url'];
         }
 
         $teacher->update($validated);
@@ -100,10 +120,7 @@ class TeacherController extends Controller
     {
         $teacher = Teacher::findOrFail($id);
 
-        if ($teacher->photo && file_exists(public_path($teacher->photo))) {
-            @unlink(public_path($teacher->photo));
-        }
-
+        // Local filesystem checking logic removed as files now safely live on the cloud
         $teacher->delete();
         return redirect('teachers')->with('flash_message', 'Teacher Deleted!');
     }

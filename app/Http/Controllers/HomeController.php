@@ -85,7 +85,7 @@ class HomeController extends Controller
                 'coursesAttendanceSummary',
                 'totalTeachers',       
                 'teachersCheckedIn',   
-                'teachersAbsent'
+                'teachersAbsent',
             );
         });
 
