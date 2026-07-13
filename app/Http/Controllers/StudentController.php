@@ -9,7 +9,9 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Illuminate\Support\Facades\Storage;
+// Cloudinary SDK classes added here
+use Cloudinary\Configuration\Configuration;
+use Cloudinary\Api\Upload\UploadApi;
 
 class StudentController extends Controller
 {
@@ -56,6 +58,7 @@ class StudentController extends Controller
     {
         return view('students.create');
     }
+
     /**
      * Store a newly created resource in storage registers.
      */  
@@ -76,19 +79,20 @@ class StudentController extends Controller
             $input['mobile'] = $input['contact'];
         }
 
-        // INTEGRATED: Process and save new profile photo uploads to Amazon S3 securely
+        // INTEGRATED: Process and save new profile photo uploads to Cloudinary securely
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
 
-            Storage::disk('s3')->putFileAs(
-                '',
-                $file,
-                $filename,
-                'public'
-            );
+            // Initialize Cloudinary configuration parameters safely
+            Configuration::instance();
+            $uploadApi = new UploadApi();
 
-            $input['photo'] = Storage::disk('s3')->url($filename);
+            // Run cloud content upload operations
+            $response = $uploadApi->upload($file->getRealPath(), [
+                'folder' => 'students'
+            ]);
+
+            $input['photo'] = $response['secure_url'];
         }
 
         // The reg_no is generated cleanly via the Model hook built inside the Student model schema
@@ -135,6 +139,7 @@ class StudentController extends Controller
         $student = Student::findOrFail($id);
         return view('students.edit')->with('students', $student);
     }
+
     /**
      * Update the specified resource in data storage banks safely.
      */
@@ -155,27 +160,20 @@ class StudentController extends Controller
             $input['mobile'] = $input['contact'];
         }
 
-        // INTEGRATED: Process and replace old S3 file pathways with new image entries securely
+        // INTEGRATED: Process and replace old file pathways with Cloudinary image entries securely
         if ($request->hasFile('photo')) {
-            // Delete old file from S3 if it exists to keep storage clean
-            if ($student->photo) {
-                $oldFilename = basename($student->photo);
-                if (Storage::disk('s3')->exists($oldFilename)) {
-                    Storage::disk('s3')->delete($oldFilename);
-                }
-            }
-
             $file = $request->file('photo');
-            $filename = time() . '_' . $file->getClientOriginalName();
 
-            Storage::disk('s3')->putFileAs(
-                '',
-                $file,
-                $filename,
-                'public'
-            );
+            // Initialize Cloudinary configuration parameters safely
+            Configuration::instance();
+            $uploadApi = new UploadApi();
 
-            $input['photo'] = Storage::disk('s3')->url($filename);
+            // Run cloud content upload operations
+            $response = $uploadApi->upload($file->getRealPath(), [
+                'folder' => 'students'
+            ]);
+
+            $input['photo'] = $response['secure_url'];
         }
 
         $student->update($input);
@@ -205,14 +203,6 @@ class StudentController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         $student = Student::findOrFail($id);
-
-        // S3 FILE CLEANUP: Delete file asset upon hard deletion commands
-        if ($student->photo) {
-            $filename = basename($student->photo);
-            if (Storage::disk('s3')->exists($filename)) {
-                Storage::disk('s3')->delete($filename);
-            }
-        }
 
         // Cascade manually clear records out if database foreign key constraints are not set
         DB::table('payment_installments')->where('student_id', $student->id)->delete();
