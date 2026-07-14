@@ -16,7 +16,9 @@
         border-bottom: 1px solid #dee2e6;
     }
     .custom-body { padding: 20px; }
-    .action-btn-group { display: flex; gap: 6px; }
+    /* .action-btn-group { display: flex; gap: 6px; } */
+    .action-btn-group { display: flex; gap: 6px; white-space: nowrap; }
+
     
     /* Clean text protection utility for long text entries */
     .text-truncate-custom {
@@ -162,7 +164,9 @@
                     </td>
                     <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #334155;">{{ $item->mobile ?? $item->contact ?? '—' }}</td>
                     <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; text-align: center;">
-                        <div class="action-btn-group" style="justify-content: center;">
+                        <!-- <div class="action-btn-group" style="justify-content: center;"> -->
+                            <div class="action-btn-group" style="justify-content: center;">
+
                             <a href="{{ url('/students/' . $item->id . '/profile') }}" class="btn btn-info btn-sm" style="color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; background-color: #17a2b8; border: 1px solid #17a2b8; font-size: 12px; font-weight: 600; display: inline-block;">
                                 Profile
                             </a>
