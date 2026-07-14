@@ -110,16 +110,18 @@
 <!-- 🛠️ COMBINED CONTAINER: Locked table layout to fit screen limits natively -->
 <table class="table table-bordered table-striped" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6; font-size: 13px;">
     <thead style="background: #f1f1f1; font-weight: 600; color: #475569;">
-        <tr>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 4%;">#</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 8%;">Photo</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Reg No.</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Name</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Course</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Address</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Mobile</th>
-            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 10%;">Actions</th>
-        </tr>
+        <!-- REPLACE YOUR HEADERS ROW WITH THIS BETTER SPACE BALANCE -->
+<tr>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 4%;">#</th>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 7%;">Photo</th>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 11%;">Reg No.</th>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 16%;">Name</th>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 15%;">Course</th>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Address</th>
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 14%;">Mobile</th> <!-- Increased from 12% to 14% -->
+    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 15%;">Actions</th> <!-- Increased from 10% to 15% -->
+</tr>
+
     </thead>
     <tbody>
     @forelse($students as $item)
