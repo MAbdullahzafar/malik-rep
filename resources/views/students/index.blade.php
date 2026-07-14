@@ -105,137 +105,99 @@
                 </div>
             </div>
             
-        </div>
-        
-        <!-- <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
-           <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
- 
-        <thead style="background: #f1f1f1; font-weight: 600; color: #475569;"> -->
+      </div>
 
-
-<!-- Move the scroll wrapper div out here -->
-<div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
-    <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
-        <thead style="background: #f1f1f1; font-weight: 600; color: #475569;">
-            <!-- Header rows go completely uninhibited here -->
-
-
-                <!-- <tr>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 80px;">Photo</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 130px;">Reg No.</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Name</th>
-                    <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 120px;">Course</th> -->
-                     <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Course</th>
-
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Address</th>
-                    <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Mobile</th>
-                    <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 200px;">Actions</th> -->
-                     <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 240px;">Actions</th>
-
-                </tr> --> -->
-
-
-                <tr>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 4%;">#</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 8%;">Photo</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Reg No.</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Name</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Course</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Address</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Mobile</th>
-                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 10%;">Actions</th>
-                </tr>
-
-
-
-
-
-
-
-
-            </thead>
-            <tbody>
-            @forelse($students as $item)
-                <tr class="student-table-row">
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; color: #64748b; font-weight: 600;">{{ ($students->currentPage() - 1) * $students->perPage() + $loop->iteration }}</td>
-                    
-                    <td style="border: 1px solid #dee2e6; padding: 6px; vertical-align: middle; text-align: center;">
-                        @if(!empty($item->photo))
-                            <img src="{{ asset($item->photo) }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
-                        @else
-                            <div style="width: 45px; height: 45px; border-radius: 50%; background: #eaeaea; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #777;">
-                                {{ strtoupper(substr($item->name, 0, 1)) }}
-                            </div>
-                        @endif
-                    </td>
-
-                    <td class="student-reg-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 700; color: #04AA6D;">
-                        {{ $item->reg_no ?? 'PENDING' }}
-                    </td>
-
-                    <td class="student-name-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 700; color: #1e293b;">{{ $item->name }}</td>
-                    
-                    <!-- 🛡️ FIXED CORE PAYLOAD BINDING LOOKUP TO MATCH RAW JOINS -->
-                    <td class="student-course-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #0284c7;">
-                        @if(!empty($item->course_name))
-                            <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.85rem; font-weight: 600;">
-                                {{ $item->course_name }}
-                            </span>
-                        @else
-                            <span style="color: #999; font-style: italic; font-size: 0.85rem;">No Enrollment</span>
-                        @endif
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; color: #475569;">
-                        <div class="text-truncate-custom" title="{{ $item->address }}">
-                            {{ $item->address }}
-                        </div>
-                    </td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #334155;">{{ $item->mobile ?? $item->contact ?? '—' }}</td>
-                    <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; text-align: center;">
-                        <!-- <div class="action-btn-group" style="justify-content: center;"> -->
-                            <div class="action-btn-group" style="justify-content: center;">
-
-                            <a href="{{ url('/students/' . $item->id . '/profile') }}" class="btn btn-info btn-sm" style="color: white; text-decoration: none; padding: 4px 10px; border-radius: 4px; background-color: #17a2b8; border: 1px solid #17a2b8; font-size: 12px; font-weight: 600; display: inline-block;">
-                                Profile
-                            </a>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="openPopup('editModal{{ $item->id }}')" style="padding: 4px 10px; border-radius: 4px; background-color: #007bff; border: none; color: white; cursor: pointer; font-size: 12px; font-weight: 600;">Edit</button>
-                            
-                            <form method="POST" action="{{ url('/students' . '/' . $item->id) }}" style="display:inline; margin: 0;">
-                                {{ method_field('DELETE') }}
-                                {{ csrf_field() }}
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirm delete student record?')" style="padding: 4px 10px; border-radius: 4px; background-color: #dc3545; border: none; color: white; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-
-                <!-- INDIVIDUAL POPUP LAYER FOR VIEWING -->
-                <div class="popup-overlay" id="viewModal{{ $item->id }}-overlay" onclick="closePopup('viewModal{{ $item->id }}')"></div>
-                <div class="native-popup" id="viewModal{{ $item->id }}">
-                    <h3 style="margin-top: 0; font-weight: 700; color: #1e293b;">Student Details</h3>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-                    
-                    @if($item->photo)
-    <img src="{{ $item->photo }}"
-         alt="Student Photo"
-         style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
-@else
-    <img src="{{ asset('images/default-avatar.png') }}"
-         alt="No Photo"
-         style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
-@endif
-
-                    <p><strong>Registration Code:</strong> <span style="font-weight:700; color: #04AA6D;">{{ $item->reg_no ?? 'PENDING' }}</span></p>
-                    <p><strong>Full Name:</strong> {{ $item->name }}</p>
-                    <p><strong>Enrolled Course:</strong> {{ $item->course_name ?? 'No Course Assigned' }}</p>
-                    <p><strong>Address:</strong> {{ $item->address }}</p>
-                    <p><strong>Mobile Contact:</strong> {{ $item->mobile ?? $item->contact ?? '—' }}</p>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-                    <div style="text-align: right;">
-                        <button type="button" class="btn btn-secondary" onclick="closePopup('viewModal{{ $item->id }}')" style="padding: 6px 14px; background: #6c757d; border: none; color: white; border-radius: 4px; cursor: pointer;">Close View Window</button>
+<!-- 🛠️ COMBINED CONTAINER: Locked table layout to fit screen limits natively -->
+<table class="table table-bordered table-striped" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6; font-size: 13px;">
+    <thead style="background: #f1f1f1; font-weight: 600; color: #475569;">
+        <tr>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 4%;">#</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 8%;">Photo</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Reg No.</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Name</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Course</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Address</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Mobile</th>
+            <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 10%;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @forelse($students as $item)
+        <tr class="student-table-row">
+            <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; color: #64748b; font-weight: 600;">{{ ($students->currentPage() - 1) * $students->perPage() + $loop->iteration }}</td>
+            
+            <td style="border: 1px solid #dee2e6; padding: 6px; vertical-align: middle; text-align: center;">
+                @if(!empty($item->photo))
+                    <img src="{{ asset($item->photo) }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                @else
+                    <div style="width: 45px; height: 45px; border-radius: 50%; background: #eaeaea; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #777;">
+                        {{ strtoupper(substr($item->name, 0, 1)) }}
                     </div>
+                @endif
+            </td>
+
+            <td class="student-reg-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 700; color: #04AA6D;">
+                {{ $item->reg_no ?? 'PENDING' }}
+            </td>
+
+            <td class="student-name-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 700; color: #1e293b;">{{ $item->name }}</td>
+            
+            <td class="student-course-cell" style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #0284c7;">
+                @if(!empty($item->course_name))
+                    <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.85rem; font-weight: 600;">
+                        {{ $item->course_name }}
+                    </span>
+                @else
+                    <span style="color: #999; font-style: italic; font-size: 0.85rem;">No Enrollment</span>
+                @endif
+            </td>
+            <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; color: #475569;">
+                <div class="text-truncate-custom" title="{{ $item->address }}">
+                    {{ $item->address }}
                 </div>
+            </td>
+            <td style="border: 1px solid #dee2e6; padding: 12px; vertical-align: middle; font-weight: 600; color: #334155;">{{ $item->mobile ?? $item->contact ?? '—' }}</td>
+            
+            <!-- 🛠️ UPDATED COMPACT BUTTON LAYOUT -->
+            <td style="border: 1px solid #dee2e6; padding: 6px 4px; vertical-align: middle; text-align: center;">
+                <div class="action-btn-group" style="justify-content: center; gap: 3px; display: flex; flex-wrap: nowrap; white-space: nowrap;">
+                    <a href="{{ url('/students/' . $item->id . '/profile') }}" class="btn btn-info btn-sm" style="color: white; text-decoration: none; padding: 3px 6px; border-radius: 4px; background-color: #17a2b8; border: 1px solid #17a2b8; font-size: 11px; font-weight: 600; display: inline-block;">
+                        Profile
+                    </a>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openPopup('editModal{{ $item->id }}')" style="padding: 3px 6px; border-radius: 4px; background-color: #007bff; border: none; color: white; cursor: pointer; font-size: 11px; font-weight: 600;">Edit</button>
+                    
+                    <form method="POST" action="{{ url('/students' . '/' . $item->id) }}" style="display:inline; margin: 0;">
+                        {{ method_field('DELETE') }}
+                        {{ csrf_field() }}
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirm delete student record?')" style="padding: 3px 6px; border-radius: 4px; background-color: #dc3545; border: none; color: white; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+
+        <!-- INDIVIDUAL POPUP LAYER FOR VIEWING -->
+        <div class="popup-overlay" id="viewModal{{ $item->id }}-overlay" onclick="closePopup('viewModal{{ $item->id }}')"></div>
+        <div class="native-popup" id="viewModal{{ $item->id }}">
+            <h3 style="margin-top: 0; font-weight: 700; color: #1e293b;">Student Details</h3>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+            
+            @if($item->photo)
+                <img src="{{ $item->photo }}" alt="Student Photo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+            @else
+                <img src="{{ asset('images/default-avatar.png') }}" alt="No Photo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+            @endif
+
+            <p><strong>Registration Code:</strong> <span style="font-weight:700; color: #04AA6D;">{{ $item->reg_no ?? 'PENDING' }}</span></p>
+            <p><strong>Full Name:</strong> {{ $item->name }}</p>
+            <p><strong>Enrolled Course:</strong> {{ $item->course_name ?? 'No Course Assigned' }}</p>
+            <p><strong>Address:</strong> {{ $item->address }}</p>
+            <p><strong>Mobile Contact:</strong> {{ $item->mobile ?? $item->contact ?? '—' }}</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+            <div style="text-align: right;">
+                <button type="button" class="btn btn-secondary" onclick="closePopup('viewModal{{ $item->id }}')" style="padding: 6px 14px; background: #6c757d; border: none; color: white; border-radius: 4px; cursor: pointer;">Close View Window</button>
+            </div>
+        </div>
+
                 <!-- INDIVIDUAL POPUP LAYER FOR EDITING -->
                 <div class="popup-overlay" id="editModal{{ $item->id }}-overlay" onclick="closePopup('editModal{{ $item->id }}')"></div>
                 <div class="native-popup" id="editModal{{ $item->id }}">
