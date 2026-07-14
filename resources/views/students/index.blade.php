@@ -120,20 +120,40 @@
             <!-- Header rows go completely uninhibited here -->
 
 
-                <tr>
+                <!-- <tr>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 80px;">Photo</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 130px;">Reg No.</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Name</th>
                     <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 120px;">Course</th> -->
-                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Course</th>
+                     <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Course</th>
 
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left;">Address</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 140px;">Mobile</th>
                     <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 200px;">Actions</th> -->
-                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 240px;">Actions</th>
+                     <!-- <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 240px;">Actions</th>
 
+                </tr> --> -->
+
+
+                <tr>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 4%;">#</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 8%;">Photo</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Reg No.</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Name</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Course</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 18%;">Address</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 12%;">Mobile</th>
+                    <th style="border: 1px solid #dee2e6; padding: 8px; text-align: left; width: 10%;">Actions</th>
                 </tr>
+
+
+
+
+
+
+
+
             </thead>
             <tbody>
             @forelse($students as $item)
