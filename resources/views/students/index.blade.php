@@ -107,10 +107,19 @@
             
         </div>
         
-        <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
+        <!-- <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
            <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
  
+        <thead style="background: #f1f1f1; font-weight: 600; color: #475569;"> -->
+
+
+<!-- Move the scroll wrapper div out here -->
+<div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+    <table class="table table-bordered table-striped" style="width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; border: 1px solid #dee2e6;">
         <thead style="background: #f1f1f1; font-weight: 600; color: #475569;">
+            <!-- Header rows go completely uninhibited here -->
+
+
                 <tr>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 60px;">#</th>
                     <th style="border: 1px solid #dee2e6; padding: 12px; text-align: left; width: 80px;">Photo</th>
