@@ -242,9 +242,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payrolls/generate', [PayrollController::class, 'create'])->name('payrolls.create');
     Route::post('/payrolls/generate', [PayrollController::class, 'store'])->name('payrolls.store');
     Route::post('/payrolls/{id}/pay', [PayrollController::class, 'markAsPaid'])->name('payrolls.pay');
-
-// Automated WhatsApp Attendance Alert Route
-    Route::post('/attendance/absent/{student_id}', [StudentAttendanceController::class, 'markAbsent'])->name('attendance.absent');
+    // Bulk Course Absence WhatsApp Broadcast Channel Engine
+    Route::post('/attendance/broadcast/{sheet_id}', [App\Http\Controllers\HomeController::class, 'broadcastCourseAbsentees'])->name('attendance.broadcast.course');
 
     });
 /*
