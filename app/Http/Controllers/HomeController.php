@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Twilio\Rest\Client;
+
+
 
 class HomeController extends Controller
 {
@@ -64,7 +67,8 @@ class HomeController extends Controller
                     'name' => $course->name,
                     'present' => $todaySheet ? $todaySheet->records->where('status', 'Present')->count() : 0,
                     'absent' => $todaySheet ? $todaySheet->records->where('status', 'Absent')->count() : 0,
-                    'is_tracked' => !is_null($todaySheet)
+                    'is_tracked' => !is_null($todaySheet),
+                    'sheet_id' => $todaySheet ? $todaySheet->id : null // Captured to power the dashboard broadcast button
                 ];
             });
 
@@ -105,5 +109,61 @@ class HomeController extends Controller
         Artisan::call('cache:clear');
 
         return redirect()->back()->with('success', '⚡ Project Optimization Successful: System compiled cache footprints flushed cleanly!');
+    }
+
+    /**
+     * Bulk Course Absence WhatsApp Broadcast Channel Engine
+     */
+    public function broadcastCourseAbsentees($sheetId)
+    {
+        // 1. Fetch the active attendance sheet along with its specific absent records
+        $sheet = StudentAttendanceSheet::with(['records' => function($query) {
+            $query->where('status', 'Absent');
+        }, 'records.student'])->findOrFail($sheetId);
+
+        $absentRecords = $sheet->records;
+
+        if ($absentRecords->isEmpty()) {
+            return back()->with('error', 'No absent students found for this course tracking record today.');
+        }
+
+        try {
+            $sid = env('TWILIO_SID');
+            $token = env('TWILIO_AUTH_TOKEN');
+            $twilio = new Client($sid, $token);
+            
+            $successCount = 0;
+
+            // 2. Loop through every absent student and trigger their individual WhatsApp alert
+            foreach ($absentRecords as $record) {
+                $student = $record->student;
+
+                if ($student && $student->mobile) {
+                    // Clean up formatting rules to ensure proper international delivery
+                    $cleanMobile = str_replace(['+', ' ', '-'], '', $student->mobile);
+
+                    $twilio->messages->create(
+                        "whatsapp:" . $cleanMobile,
+                        [
+                            "from" => "whatsapp:+14155238886",
+                            "contentSid" => "HXb5b62575e6e4ff9d2c1094ece14bf7e0",
+                            "contentVariables" => json_encode([
+                                "1" => (string)$student->name,
+                                "2" => "Absent Today"
+                            ])
+                        ]
+                    );
+                    $successCount++;
+                }
+            }
+
+            // Flush the metrics cache so the dashboard immediately shows refreshed synchronized state metrics updates
+            Artisan::call('cache:clear');
+
+            return back()->with('success', "Successfully broadcasted real-time alerts to {$successCount} parents!");
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Broadcast execution error: ' . $e->getMessage());
+        }
     }
 }
