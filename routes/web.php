@@ -242,7 +242,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payrolls/generate', [PayrollController::class, 'create'])->name('payrolls.create');
     Route::post('/payrolls/generate', [PayrollController::class, 'store'])->name('payrolls.store');
     Route::post('/payrolls/{id}/pay', [PayrollController::class, 'markAsPaid'])->name('payrolls.pay');
-});
+
+// Automated WhatsApp Attendance Alert Route
+    Route::post('/attendance/absent/{student_id}', [StudentAttendanceController::class, 'markAbsent'])->name('attendance.absent');
+
+    });
 /*
 |--------------------------------------------------------------------------
 | System Maintenance Debug Utility Triggers & Schema Repair Mechanics
