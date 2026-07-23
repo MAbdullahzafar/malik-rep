@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('content')
@@ -117,12 +116,11 @@
         cursor: pointer;
         transition: all 0.15s ease;
     }
-    .status-pill-item input[type="radio"]:checked + .status-label.p-lbl { background: #fff5f5; border-color: #0070f3; color: #0070f3; background: transparent; }
+    .status-pill-item input[type="radio"]:checked + .status-label.p-lbl { border-color: #0070f3; color: #0070f3; background: transparent; }
     .status-pill-item input[type="radio"]:checked + .status-label.a-lbl { background: #fff5f5; border-color: #dc3545; color: #dc3545; }
     .status-pill-item input[type="radio"]:checked + .status-label.l-lbl { background: #fff9db; border-color: #f59e0b; color: #f59e0b; }
     .status-pill-item input[type="radio"]:checked + .status-label.e-lbl { background: #f4f4f5; border-color: #6c757d; color: #6c757d; }
 </style>
-
 <div class="container-fluid p-0">
     <!-- Header Configuration Matrix Panel -->
     <div class="row mb-5">
@@ -135,6 +133,12 @@
     @if(session('success'))
         <div class="alert alert-dark mb-4" style="background: #111111; color: #ffffff; border: none; border-radius: 8px; padding: 14px 20px; font-size: 0.9rem;">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger mb-4" style="border-radius: 8px; padding: 14px 20px; font-size: 0.9rem;">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -167,6 +171,7 @@
             </form>
         </div>
     </div>
+
     <!-- Entry Directory Matrix Sheet -->
     @if($selectedCourseId)
         <div class="card tech-card">
@@ -184,7 +189,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('attendance.student.store') }}">
+                <form method="POST" action="{{ route('attendance.student.store') }}" id="bulkAttendanceForm">
                     @csrf
                     <input type="hidden" name="course_id" value="{{ $selectedCourseId }}">
                     <input type="hidden" name="attendance_date" value="{{ $selectedDate }}">
@@ -197,6 +202,7 @@
                                     <th>Student Name</th>
                                     <th style="width: 320px;">Presence Status</th>
                                     <th>Log Remarks / Exceptions</th>
+                                    <th style="width: 150px; text-align: center;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -262,10 +268,19 @@
                                                    placeholder="Optional details (e.g., Sick leave, Late bus)..." 
                                                    style="padding: 6px 12px; font-size: 0.85rem;">
                                         </td>
+                                        <td style="text-align: center;">
+                                            <!-- Dedicated Standalone WhatsApp Alert Execution Button Trigger -->
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger btn-sm fw-bold" 
+                                                    style="font-size: 0.75rem; padding: 5px 10px; border-radius: 4px;"
+                                                    onclick="event.preventDefault(); document.getElementById('whatsapp-form-{{ $student->id }}').submit();">
+                                                 Send WhatsApp
+                                            </button>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-5 text-muted" style="font-style: italic;">
+                                        <td colspan="5" class="text-center py-5 text-muted" style="font-style: italic;">
                                             No student records found matching this course context.
                                         </td>
                                     </tr>
@@ -286,5 +301,17 @@
         </div>
     @endif
 </div>
+
+<!-- Standalone Background Post Forms for Non-Nested Form Execution -->
+@if($selectedCourseId)
+    @foreach($students as $entry)
+        @php
+            $student = $existingSheet ? $entry->student : $entry;
+        @endphp
+        <form id="whatsapp-form-{{ $student->id }}" action="{{ route('attendance.absent', $student->id) }}" method="POST" style="display: none;">
+            @csrf
+        </form>
+    @endforeach
+@endif
 
 @endsection

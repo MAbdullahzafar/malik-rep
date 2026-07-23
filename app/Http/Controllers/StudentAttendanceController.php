@@ -9,8 +9,12 @@ use App\Models\StudentAttendanceSheet;
 use App\Models\StudentAttendanceRecord;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Twilio\Rest\Client;
+
 
 class StudentAttendanceController extends Controller
+
+
 {
     /**
      * Display the attendance tracking matrix sheet filtered by selected course context.
@@ -96,5 +100,40 @@ class StudentAttendanceController extends Controller
             'course_id' => $courseId,
             'date' => $date
         ])->with('success', 'Student attendance registry records updated inside system index.');
+    }
+
+    /**
+     * Automated WhatsApp Attendance Alert Engine
+     */
+    public function markAbsent(Request $request, $studentId)
+    {
+        $student = Student::findOrFail($studentId);
+        
+        if (!$student->parent_phone) {
+            return back()->with('error', 'Parent phone number is missing.');
+        }
+
+        try {
+            $sid = env('TWILIO_SID');
+            $token = env('TWILIO_AUTH_TOKEN');
+            $twilio = new Client($sid, $token);
+
+            $twilio->messages->create(
+                "whatsapp:" . $student->parent_phone, 
+                [
+                    "from" => "whatsapp:+14155238886", 
+                    "contentSid" => "HXb5b62575e6e4ff9d2c1094ece14bf7e0", 
+                    "contentVariables" => json_encode([
+                        "1" => $student->name,
+                        "2" => "Absent"
+                    ])
+                ]
+            );
+
+            return back()->with('success', 'WhatsApp attendance notification successfully delivered!');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Message dispatch failed: ' . $e->getMessage());
+        }
     }
 }
