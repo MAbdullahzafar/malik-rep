@@ -140,6 +140,7 @@
         @endforeach
     </div>
 
+   
     <!-- Real-Time Course-Wise & Faculty Attendance Matrix Section -->
     <div class="row g-4">
         
@@ -159,7 +160,7 @@
                                     <th>Course Curriculum Title</th>
                                     <th style="width: 150px;">Present Students</th>
                                     <th style="width: 150px;">Absent Students</th>
-                                    <th style="width: 160px; text-align: right;">Registry State</th>
+                                    <th style="width: 240px; text-align: right;">Registry State</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -177,8 +178,18 @@
                                             </span>
                                         </td>
                                         <td style="text-align: right;">
-                                            @if($summary['is_tracked'])
-                                                <span style="color: #10b981; font-weight: 500; font-size: 0.85rem;">● Synchronized</span>
+                                            @if($summary['is_tracked'] && !is_null($summary['sheet_id']))
+                                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                                    <span style="color: #10b981; font-weight: 500; font-size: 0.85rem;">● Synchronized</span>
+                                                    
+                                                    <!-- One-Click Automated Course WhatsApp Broadcast Form Trigger -->
+                                                    <form action="{{ route('attendance.broadcast.course', $summary['sheet_id']) }}" method="POST" class="d-inline mb-0">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-tech-dark btn-sm fw-bold" style="font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; line-height: 1;">
+                                                            Blast Alerts
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             @else
                                                 <span style="color: #888888; font-weight: 500; font-size: 0.85rem; font-style: italic;">Pending Entry</span>
                                             @endif
@@ -197,6 +208,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Integrated Teacher/Faculty Attendance Summary Matrix Box (Right Pane Header) -->
         <div class="col-12 col-xl-5">
