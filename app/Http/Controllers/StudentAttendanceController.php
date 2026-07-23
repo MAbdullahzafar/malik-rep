@@ -109,7 +109,7 @@ class StudentAttendanceController extends Controller
     {
         $student = Student::findOrFail($studentId);
         
-        if (!$student->parent_phone) {
+        if (!$student->mobile ) {
             return back()->with('error', 'Parent phone number is missing.');
         }
 
@@ -119,7 +119,7 @@ class StudentAttendanceController extends Controller
             $twilio = new Client($sid, $token);
 
             $twilio->messages->create(
-                "whatsapp:" . $student->parent_phone, 
+                "whatsapp:" . $student->mobile, 
                 [
                     "from" => "whatsapp:+14155238886", 
                     "contentSid" => "HXb5b62575e6e4ff9d2c1094ece14bf7e0", 
